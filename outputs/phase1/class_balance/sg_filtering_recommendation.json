@@ -1,0 +1,1698 @@
+[
+  {
+    "domain": "D1",
+    "scale_pct": 5,
+    "label": "D1_5pct",
+    "top10_sg_classes": [
+      225,
+      62,
+      14,
+      194,
+      139,
+      12,
+      221,
+      166,
+      2,
+      227
+    ],
+    "sg_details": [
+      {
+        "space_group_no": 225,
+        "space_group": "Fm-3m",
+        "train": 59,
+        "val": 9,
+        "test": 15,
+        "total": 83
+      },
+      {
+        "space_group_no": 62,
+        "space_group": "Pnma",
+        "train": 50,
+        "val": 12,
+        "test": 11,
+        "total": 73
+      },
+      {
+        "space_group_no": 14,
+        "space_group": "P2_1/c",
+        "train": 57,
+        "val": 9,
+        "test": 6,
+        "total": 72
+      },
+      {
+        "space_group_no": 194,
+        "space_group": "P6_3/mmc",
+        "train": 33,
+        "val": 9,
+        "test": 9,
+        "total": 51
+      },
+      {
+        "space_group_no": 139,
+        "space_group": "I4/mmm",
+        "train": 37,
+        "val": 6,
+        "test": 4,
+        "total": 47
+      },
+      {
+        "space_group_no": 12,
+        "space_group": "C2/m",
+        "train": 35,
+        "val": 5,
+        "test": 6,
+        "total": 46
+      },
+      {
+        "space_group_no": 221,
+        "space_group": "Pm-3m",
+        "train": 28,
+        "val": 9,
+        "test": 8,
+        "total": 45
+      },
+      {
+        "space_group_no": 166,
+        "space_group": "R-3m",
+        "train": 34,
+        "val": 5,
+        "test": 5,
+        "total": 44
+      },
+      {
+        "space_group_no": 2,
+        "space_group": "P-1",
+        "train": 29,
+        "val": 6,
+        "test": 7,
+        "total": 42
+      },
+      {
+        "space_group_no": 227,
+        "space_group": "Fd-3m",
+        "train": 28,
+        "val": 5,
+        "test": 6,
+        "total": 39
+      }
+    ],
+    "sg_imbalance_ratio": 2.11,
+    "sg_modeling_allowed": true,
+    "reason": "",
+    "warnings": [],
+    "total_sg_classes_in_split": 139,
+    "top10_train_min": 28,
+    "top10_train_max": 59
+  },
+  {
+    "domain": "D1",
+    "scale_pct": 10,
+    "label": "D1_10pct",
+    "top10_sg_classes": [
+      225,
+      14,
+      62,
+      194,
+      2,
+      139,
+      227,
+      221,
+      166,
+      12
+    ],
+    "sg_details": [
+      {
+        "space_group_no": 225,
+        "space_group": "Fm-3m",
+        "train": 109,
+        "val": 31,
+        "test": 21,
+        "total": 161
+      },
+      {
+        "space_group_no": 14,
+        "space_group": "P2_1/c",
+        "train": 106,
+        "val": 20,
+        "test": 27,
+        "total": 153
+      },
+      {
+        "space_group_no": 62,
+        "space_group": "Pnma",
+        "train": 110,
+        "val": 19,
+        "test": 21,
+        "total": 150
+      },
+      {
+        "space_group_no": 194,
+        "space_group": "P6_3/mmc",
+        "train": 72,
+        "val": 17,
+        "test": 18,
+        "total": 107
+      },
+      {
+        "space_group_no": 2,
+        "space_group": "P-1",
+        "train": 61,
+        "val": 12,
+        "test": 14,
+        "total": 87
+      },
+      {
+        "space_group_no": 139,
+        "space_group": "I4/mmm",
+        "train": 59,
+        "val": 12,
+        "test": 14,
+        "total": 85
+      },
+      {
+        "space_group_no": 227,
+        "space_group": "Fd-3m",
+        "train": 60,
+        "val": 9,
+        "test": 14,
+        "total": 83
+      },
+      {
+        "space_group_no": 221,
+        "space_group": "Pm-3m",
+        "train": 58,
+        "val": 12,
+        "test": 12,
+        "total": 82
+      },
+      {
+        "space_group_no": 166,
+        "space_group": "R-3m",
+        "train": 60,
+        "val": 6,
+        "test": 15,
+        "total": 81
+      },
+      {
+        "space_group_no": 12,
+        "space_group": "C2/m",
+        "train": 57,
+        "val": 9,
+        "test": 14,
+        "total": 80
+      }
+    ],
+    "sg_imbalance_ratio": 1.93,
+    "sg_modeling_allowed": true,
+    "reason": "",
+    "warnings": [],
+    "total_sg_classes_in_split": 161,
+    "top10_train_min": 57,
+    "top10_train_max": 110
+  },
+  {
+    "domain": "D1",
+    "scale_pct": 15,
+    "label": "D1_15pct",
+    "top10_sg_classes": [
+      62,
+      14,
+      225,
+      194,
+      166,
+      227,
+      2,
+      139,
+      12,
+      221
+    ],
+    "sg_details": [
+      {
+        "space_group_no": 62,
+        "space_group": "Pnma",
+        "train": 171,
+        "val": 33,
+        "test": 31,
+        "total": 235
+      },
+      {
+        "space_group_no": 14,
+        "space_group": "P2_1/c",
+        "train": 151,
+        "val": 33,
+        "test": 42,
+        "total": 226
+      },
+      {
+        "space_group_no": 225,
+        "space_group": "Fm-3m",
+        "train": 161,
+        "val": 25,
+        "test": 35,
+        "total": 221
+      },
+      {
+        "space_group_no": 194,
+        "space_group": "P6_3/mmc",
+        "train": 107,
+        "val": 26,
+        "test": 24,
+        "total": 157
+      },
+      {
+        "space_group_no": 166,
+        "space_group": "R-3m",
+        "train": 94,
+        "val": 18,
+        "test": 20,
+        "total": 132
+      },
+      {
+        "space_group_no": 227,
+        "space_group": "Fd-3m",
+        "train": 86,
+        "val": 19,
+        "test": 20,
+        "total": 125
+      },
+      {
+        "space_group_no": 2,
+        "space_group": "P-1",
+        "train": 84,
+        "val": 21,
+        "test": 20,
+        "total": 125
+      },
+      {
+        "space_group_no": 139,
+        "space_group": "I4/mmm",
+        "train": 90,
+        "val": 16,
+        "test": 19,
+        "total": 125
+      },
+      {
+        "space_group_no": 12,
+        "space_group": "C2/m",
+        "train": 96,
+        "val": 16,
+        "test": 12,
+        "total": 124
+      },
+      {
+        "space_group_no": 221,
+        "space_group": "Pm-3m",
+        "train": 91,
+        "val": 15,
+        "test": 18,
+        "total": 124
+      }
+    ],
+    "sg_imbalance_ratio": 2.04,
+    "sg_modeling_allowed": true,
+    "reason": "",
+    "warnings": [],
+    "total_sg_classes_in_split": 174,
+    "top10_train_min": 84,
+    "top10_train_max": 171
+  },
+  {
+    "domain": "D1",
+    "scale_pct": 20,
+    "label": "D1_20pct",
+    "top10_sg_classes": [
+      62,
+      14,
+      225,
+      194,
+      2,
+      12,
+      166,
+      221,
+      139,
+      227
+    ],
+    "sg_details": [
+      {
+        "space_group_no": 62,
+        "space_group": "Pnma",
+        "train": 223,
+        "val": 46,
+        "test": 49,
+        "total": 318
+      },
+      {
+        "space_group_no": 14,
+        "space_group": "P2_1/c",
+        "train": 209,
+        "val": 51,
+        "test": 50,
+        "total": 310
+      },
+      {
+        "space_group_no": 225,
+        "space_group": "Fm-3m",
+        "train": 204,
+        "val": 41,
+        "test": 48,
+        "total": 293
+      },
+      {
+        "space_group_no": 194,
+        "space_group": "P6_3/mmc",
+        "train": 141,
+        "val": 35,
+        "test": 34,
+        "total": 210
+      },
+      {
+        "space_group_no": 2,
+        "space_group": "P-1",
+        "train": 123,
+        "val": 28,
+        "test": 26,
+        "total": 177
+      },
+      {
+        "space_group_no": 12,
+        "space_group": "C2/m",
+        "train": 120,
+        "val": 24,
+        "test": 27,
+        "total": 171
+      },
+      {
+        "space_group_no": 166,
+        "space_group": "R-3m",
+        "train": 116,
+        "val": 24,
+        "test": 31,
+        "total": 171
+      },
+      {
+        "space_group_no": 221,
+        "space_group": "Pm-3m",
+        "train": 126,
+        "val": 22,
+        "test": 21,
+        "total": 169
+      },
+      {
+        "space_group_no": 139,
+        "space_group": "I4/mmm",
+        "train": 116,
+        "val": 31,
+        "test": 21,
+        "total": 168
+      },
+      {
+        "space_group_no": 227,
+        "space_group": "Fd-3m",
+        "train": 111,
+        "val": 26,
+        "test": 22,
+        "total": 159
+      }
+    ],
+    "sg_imbalance_ratio": 2.01,
+    "sg_modeling_allowed": true,
+    "reason": "",
+    "warnings": [],
+    "total_sg_classes_in_split": 183,
+    "top10_train_min": 111,
+    "top10_train_max": 223
+  },
+  {
+    "domain": "D2",
+    "scale_pct": 5,
+    "label": "D2_5pct",
+    "top10_sg_classes": [
+      225,
+      62,
+      14,
+      194,
+      139,
+      12,
+      221,
+      166,
+      2,
+      227
+    ],
+    "sg_details": [
+      {
+        "space_group_no": 225,
+        "space_group": "Fm-3m",
+        "train": 59,
+        "val": 9,
+        "test": 15,
+        "total": 83
+      },
+      {
+        "space_group_no": 62,
+        "space_group": "Pnma",
+        "train": 50,
+        "val": 12,
+        "test": 11,
+        "total": 73
+      },
+      {
+        "space_group_no": 14,
+        "space_group": "P2_1/c",
+        "train": 57,
+        "val": 9,
+        "test": 6,
+        "total": 72
+      },
+      {
+        "space_group_no": 194,
+        "space_group": "P6_3/mmc",
+        "train": 33,
+        "val": 9,
+        "test": 9,
+        "total": 51
+      },
+      {
+        "space_group_no": 139,
+        "space_group": "I4/mmm",
+        "train": 37,
+        "val": 6,
+        "test": 4,
+        "total": 47
+      },
+      {
+        "space_group_no": 12,
+        "space_group": "C2/m",
+        "train": 35,
+        "val": 5,
+        "test": 6,
+        "total": 46
+      },
+      {
+        "space_group_no": 221,
+        "space_group": "Pm-3m",
+        "train": 28,
+        "val": 9,
+        "test": 8,
+        "total": 45
+      },
+      {
+        "space_group_no": 166,
+        "space_group": "R-3m",
+        "train": 34,
+        "val": 5,
+        "test": 5,
+        "total": 44
+      },
+      {
+        "space_group_no": 2,
+        "space_group": "P-1",
+        "train": 29,
+        "val": 6,
+        "test": 7,
+        "total": 42
+      },
+      {
+        "space_group_no": 227,
+        "space_group": "Fd-3m",
+        "train": 28,
+        "val": 5,
+        "test": 6,
+        "total": 39
+      }
+    ],
+    "sg_imbalance_ratio": 2.11,
+    "sg_modeling_allowed": true,
+    "reason": "",
+    "warnings": [],
+    "total_sg_classes_in_split": 139,
+    "top10_train_min": 28,
+    "top10_train_max": 59
+  },
+  {
+    "domain": "D2",
+    "scale_pct": 10,
+    "label": "D2_10pct",
+    "top10_sg_classes": [
+      225,
+      14,
+      62,
+      194,
+      2,
+      139,
+      227,
+      221,
+      166,
+      12
+    ],
+    "sg_details": [
+      {
+        "space_group_no": 225,
+        "space_group": "Fm-3m",
+        "train": 109,
+        "val": 31,
+        "test": 21,
+        "total": 161
+      },
+      {
+        "space_group_no": 14,
+        "space_group": "P2_1/c",
+        "train": 106,
+        "val": 20,
+        "test": 27,
+        "total": 153
+      },
+      {
+        "space_group_no": 62,
+        "space_group": "Pnma",
+        "train": 110,
+        "val": 19,
+        "test": 21,
+        "total": 150
+      },
+      {
+        "space_group_no": 194,
+        "space_group": "P6_3/mmc",
+        "train": 72,
+        "val": 17,
+        "test": 18,
+        "total": 107
+      },
+      {
+        "space_group_no": 2,
+        "space_group": "P-1",
+        "train": 61,
+        "val": 12,
+        "test": 14,
+        "total": 87
+      },
+      {
+        "space_group_no": 139,
+        "space_group": "I4/mmm",
+        "train": 59,
+        "val": 12,
+        "test": 14,
+        "total": 85
+      },
+      {
+        "space_group_no": 227,
+        "space_group": "Fd-3m",
+        "train": 60,
+        "val": 9,
+        "test": 14,
+        "total": 83
+      },
+      {
+        "space_group_no": 221,
+        "space_group": "Pm-3m",
+        "train": 58,
+        "val": 12,
+        "test": 12,
+        "total": 82
+      },
+      {
+        "space_group_no": 166,
+        "space_group": "R-3m",
+        "train": 60,
+        "val": 6,
+        "test": 15,
+        "total": 81
+      },
+      {
+        "space_group_no": 12,
+        "space_group": "C2/m",
+        "train": 57,
+        "val": 9,
+        "test": 14,
+        "total": 80
+      }
+    ],
+    "sg_imbalance_ratio": 1.93,
+    "sg_modeling_allowed": true,
+    "reason": "",
+    "warnings": [],
+    "total_sg_classes_in_split": 161,
+    "top10_train_min": 57,
+    "top10_train_max": 110
+  },
+  {
+    "domain": "D2",
+    "scale_pct": 15,
+    "label": "D2_15pct",
+    "top10_sg_classes": [
+      62,
+      14,
+      225,
+      194,
+      166,
+      227,
+      2,
+      139,
+      12,
+      221
+    ],
+    "sg_details": [
+      {
+        "space_group_no": 62,
+        "space_group": "Pnma",
+        "train": 171,
+        "val": 33,
+        "test": 31,
+        "total": 235
+      },
+      {
+        "space_group_no": 14,
+        "space_group": "P2_1/c",
+        "train": 151,
+        "val": 33,
+        "test": 42,
+        "total": 226
+      },
+      {
+        "space_group_no": 225,
+        "space_group": "Fm-3m",
+        "train": 161,
+        "val": 25,
+        "test": 35,
+        "total": 221
+      },
+      {
+        "space_group_no": 194,
+        "space_group": "P6_3/mmc",
+        "train": 107,
+        "val": 26,
+        "test": 24,
+        "total": 157
+      },
+      {
+        "space_group_no": 166,
+        "space_group": "R-3m",
+        "train": 94,
+        "val": 18,
+        "test": 20,
+        "total": 132
+      },
+      {
+        "space_group_no": 227,
+        "space_group": "Fd-3m",
+        "train": 86,
+        "val": 19,
+        "test": 20,
+        "total": 125
+      },
+      {
+        "space_group_no": 2,
+        "space_group": "P-1",
+        "train": 84,
+        "val": 21,
+        "test": 20,
+        "total": 125
+      },
+      {
+        "space_group_no": 139,
+        "space_group": "I4/mmm",
+        "train": 90,
+        "val": 16,
+        "test": 19,
+        "total": 125
+      },
+      {
+        "space_group_no": 12,
+        "space_group": "C2/m",
+        "train": 96,
+        "val": 16,
+        "test": 12,
+        "total": 124
+      },
+      {
+        "space_group_no": 221,
+        "space_group": "Pm-3m",
+        "train": 91,
+        "val": 15,
+        "test": 18,
+        "total": 124
+      }
+    ],
+    "sg_imbalance_ratio": 2.04,
+    "sg_modeling_allowed": true,
+    "reason": "",
+    "warnings": [],
+    "total_sg_classes_in_split": 174,
+    "top10_train_min": 84,
+    "top10_train_max": 171
+  },
+  {
+    "domain": "D2",
+    "scale_pct": 20,
+    "label": "D2_20pct",
+    "top10_sg_classes": [
+      62,
+      14,
+      225,
+      194,
+      2,
+      12,
+      166,
+      221,
+      139,
+      227
+    ],
+    "sg_details": [
+      {
+        "space_group_no": 62,
+        "space_group": "Pnma",
+        "train": 223,
+        "val": 46,
+        "test": 49,
+        "total": 318
+      },
+      {
+        "space_group_no": 14,
+        "space_group": "P2_1/c",
+        "train": 209,
+        "val": 51,
+        "test": 50,
+        "total": 310
+      },
+      {
+        "space_group_no": 225,
+        "space_group": "Fm-3m",
+        "train": 204,
+        "val": 41,
+        "test": 48,
+        "total": 293
+      },
+      {
+        "space_group_no": 194,
+        "space_group": "P6_3/mmc",
+        "train": 141,
+        "val": 35,
+        "test": 34,
+        "total": 210
+      },
+      {
+        "space_group_no": 2,
+        "space_group": "P-1",
+        "train": 123,
+        "val": 28,
+        "test": 26,
+        "total": 177
+      },
+      {
+        "space_group_no": 12,
+        "space_group": "C2/m",
+        "train": 120,
+        "val": 24,
+        "test": 27,
+        "total": 171
+      },
+      {
+        "space_group_no": 166,
+        "space_group": "R-3m",
+        "train": 116,
+        "val": 24,
+        "test": 31,
+        "total": 171
+      },
+      {
+        "space_group_no": 221,
+        "space_group": "Pm-3m",
+        "train": 126,
+        "val": 22,
+        "test": 21,
+        "total": 169
+      },
+      {
+        "space_group_no": 139,
+        "space_group": "I4/mmm",
+        "train": 116,
+        "val": 31,
+        "test": 21,
+        "total": 168
+      },
+      {
+        "space_group_no": 227,
+        "space_group": "Fd-3m",
+        "train": 111,
+        "val": 26,
+        "test": 22,
+        "total": 159
+      }
+    ],
+    "sg_imbalance_ratio": 2.01,
+    "sg_modeling_allowed": true,
+    "reason": "",
+    "warnings": [],
+    "total_sg_classes_in_split": 183,
+    "top10_train_min": 111,
+    "top10_train_max": 223
+  },
+  {
+    "domain": "D3",
+    "scale_pct": 5,
+    "label": "D3_5pct",
+    "top10_sg_classes": [
+      225,
+      62,
+      14,
+      194,
+      139,
+      12,
+      221,
+      166,
+      2,
+      227
+    ],
+    "sg_details": [
+      {
+        "space_group_no": 225,
+        "space_group": "Fm-3m",
+        "train": 59,
+        "val": 9,
+        "test": 15,
+        "total": 83
+      },
+      {
+        "space_group_no": 62,
+        "space_group": "Pnma",
+        "train": 50,
+        "val": 12,
+        "test": 11,
+        "total": 73
+      },
+      {
+        "space_group_no": 14,
+        "space_group": "P2_1/c",
+        "train": 57,
+        "val": 9,
+        "test": 6,
+        "total": 72
+      },
+      {
+        "space_group_no": 194,
+        "space_group": "P6_3/mmc",
+        "train": 33,
+        "val": 9,
+        "test": 9,
+        "total": 51
+      },
+      {
+        "space_group_no": 139,
+        "space_group": "I4/mmm",
+        "train": 37,
+        "val": 6,
+        "test": 4,
+        "total": 47
+      },
+      {
+        "space_group_no": 12,
+        "space_group": "C2/m",
+        "train": 35,
+        "val": 5,
+        "test": 6,
+        "total": 46
+      },
+      {
+        "space_group_no": 221,
+        "space_group": "Pm-3m",
+        "train": 28,
+        "val": 9,
+        "test": 8,
+        "total": 45
+      },
+      {
+        "space_group_no": 166,
+        "space_group": "R-3m",
+        "train": 34,
+        "val": 5,
+        "test": 5,
+        "total": 44
+      },
+      {
+        "space_group_no": 2,
+        "space_group": "P-1",
+        "train": 29,
+        "val": 6,
+        "test": 7,
+        "total": 42
+      },
+      {
+        "space_group_no": 227,
+        "space_group": "Fd-3m",
+        "train": 28,
+        "val": 5,
+        "test": 6,
+        "total": 39
+      }
+    ],
+    "sg_imbalance_ratio": 2.11,
+    "sg_modeling_allowed": true,
+    "reason": "",
+    "warnings": [],
+    "total_sg_classes_in_split": 139,
+    "top10_train_min": 28,
+    "top10_train_max": 59
+  },
+  {
+    "domain": "D3",
+    "scale_pct": 10,
+    "label": "D3_10pct",
+    "top10_sg_classes": [
+      225,
+      14,
+      62,
+      194,
+      2,
+      139,
+      227,
+      221,
+      166,
+      12
+    ],
+    "sg_details": [
+      {
+        "space_group_no": 225,
+        "space_group": "Fm-3m",
+        "train": 109,
+        "val": 31,
+        "test": 21,
+        "total": 161
+      },
+      {
+        "space_group_no": 14,
+        "space_group": "P2_1/c",
+        "train": 106,
+        "val": 20,
+        "test": 27,
+        "total": 153
+      },
+      {
+        "space_group_no": 62,
+        "space_group": "Pnma",
+        "train": 110,
+        "val": 19,
+        "test": 21,
+        "total": 150
+      },
+      {
+        "space_group_no": 194,
+        "space_group": "P6_3/mmc",
+        "train": 72,
+        "val": 17,
+        "test": 18,
+        "total": 107
+      },
+      {
+        "space_group_no": 2,
+        "space_group": "P-1",
+        "train": 61,
+        "val": 12,
+        "test": 14,
+        "total": 87
+      },
+      {
+        "space_group_no": 139,
+        "space_group": "I4/mmm",
+        "train": 59,
+        "val": 12,
+        "test": 14,
+        "total": 85
+      },
+      {
+        "space_group_no": 227,
+        "space_group": "Fd-3m",
+        "train": 60,
+        "val": 9,
+        "test": 14,
+        "total": 83
+      },
+      {
+        "space_group_no": 221,
+        "space_group": "Pm-3m",
+        "train": 58,
+        "val": 12,
+        "test": 12,
+        "total": 82
+      },
+      {
+        "space_group_no": 166,
+        "space_group": "R-3m",
+        "train": 60,
+        "val": 6,
+        "test": 15,
+        "total": 81
+      },
+      {
+        "space_group_no": 12,
+        "space_group": "C2/m",
+        "train": 57,
+        "val": 9,
+        "test": 14,
+        "total": 80
+      }
+    ],
+    "sg_imbalance_ratio": 1.93,
+    "sg_modeling_allowed": true,
+    "reason": "",
+    "warnings": [],
+    "total_sg_classes_in_split": 161,
+    "top10_train_min": 57,
+    "top10_train_max": 110
+  },
+  {
+    "domain": "D3",
+    "scale_pct": 15,
+    "label": "D3_15pct",
+    "top10_sg_classes": [
+      62,
+      14,
+      225,
+      194,
+      166,
+      227,
+      2,
+      139,
+      12,
+      221
+    ],
+    "sg_details": [
+      {
+        "space_group_no": 62,
+        "space_group": "Pnma",
+        "train": 171,
+        "val": 33,
+        "test": 31,
+        "total": 235
+      },
+      {
+        "space_group_no": 14,
+        "space_group": "P2_1/c",
+        "train": 151,
+        "val": 33,
+        "test": 42,
+        "total": 226
+      },
+      {
+        "space_group_no": 225,
+        "space_group": "Fm-3m",
+        "train": 161,
+        "val": 25,
+        "test": 35,
+        "total": 221
+      },
+      {
+        "space_group_no": 194,
+        "space_group": "P6_3/mmc",
+        "train": 107,
+        "val": 26,
+        "test": 24,
+        "total": 157
+      },
+      {
+        "space_group_no": 166,
+        "space_group": "R-3m",
+        "train": 94,
+        "val": 18,
+        "test": 20,
+        "total": 132
+      },
+      {
+        "space_group_no": 227,
+        "space_group": "Fd-3m",
+        "train": 86,
+        "val": 19,
+        "test": 20,
+        "total": 125
+      },
+      {
+        "space_group_no": 2,
+        "space_group": "P-1",
+        "train": 84,
+        "val": 21,
+        "test": 20,
+        "total": 125
+      },
+      {
+        "space_group_no": 139,
+        "space_group": "I4/mmm",
+        "train": 90,
+        "val": 16,
+        "test": 19,
+        "total": 125
+      },
+      {
+        "space_group_no": 12,
+        "space_group": "C2/m",
+        "train": 96,
+        "val": 16,
+        "test": 12,
+        "total": 124
+      },
+      {
+        "space_group_no": 221,
+        "space_group": "Pm-3m",
+        "train": 91,
+        "val": 15,
+        "test": 18,
+        "total": 124
+      }
+    ],
+    "sg_imbalance_ratio": 2.04,
+    "sg_modeling_allowed": true,
+    "reason": "",
+    "warnings": [],
+    "total_sg_classes_in_split": 174,
+    "top10_train_min": 84,
+    "top10_train_max": 171
+  },
+  {
+    "domain": "D3",
+    "scale_pct": 20,
+    "label": "D3_20pct",
+    "top10_sg_classes": [
+      62,
+      14,
+      225,
+      194,
+      2,
+      12,
+      166,
+      221,
+      139,
+      227
+    ],
+    "sg_details": [
+      {
+        "space_group_no": 62,
+        "space_group": "Pnma",
+        "train": 223,
+        "val": 46,
+        "test": 49,
+        "total": 318
+      },
+      {
+        "space_group_no": 14,
+        "space_group": "P2_1/c",
+        "train": 209,
+        "val": 51,
+        "test": 50,
+        "total": 310
+      },
+      {
+        "space_group_no": 225,
+        "space_group": "Fm-3m",
+        "train": 204,
+        "val": 41,
+        "test": 48,
+        "total": 293
+      },
+      {
+        "space_group_no": 194,
+        "space_group": "P6_3/mmc",
+        "train": 141,
+        "val": 35,
+        "test": 34,
+        "total": 210
+      },
+      {
+        "space_group_no": 2,
+        "space_group": "P-1",
+        "train": 123,
+        "val": 28,
+        "test": 26,
+        "total": 177
+      },
+      {
+        "space_group_no": 12,
+        "space_group": "C2/m",
+        "train": 120,
+        "val": 24,
+        "test": 27,
+        "total": 171
+      },
+      {
+        "space_group_no": 166,
+        "space_group": "R-3m",
+        "train": 116,
+        "val": 24,
+        "test": 31,
+        "total": 171
+      },
+      {
+        "space_group_no": 221,
+        "space_group": "Pm-3m",
+        "train": 126,
+        "val": 22,
+        "test": 21,
+        "total": 169
+      },
+      {
+        "space_group_no": 139,
+        "space_group": "I4/mmm",
+        "train": 116,
+        "val": 31,
+        "test": 21,
+        "total": 168
+      },
+      {
+        "space_group_no": 227,
+        "space_group": "Fd-3m",
+        "train": 111,
+        "val": 26,
+        "test": 22,
+        "total": 159
+      }
+    ],
+    "sg_imbalance_ratio": 2.01,
+    "sg_modeling_allowed": true,
+    "reason": "",
+    "warnings": [],
+    "total_sg_classes_in_split": 183,
+    "top10_train_min": 111,
+    "top10_train_max": 223
+  },
+  {
+    "domain": "D4",
+    "scale_pct": 5,
+    "label": "D4_5pct",
+    "top10_sg_classes": [
+      225,
+      62,
+      14,
+      194,
+      139,
+      12,
+      221,
+      166,
+      2,
+      227
+    ],
+    "sg_details": [
+      {
+        "space_group_no": 225,
+        "space_group": "Fm-3m",
+        "train": 59,
+        "val": 9,
+        "test": 15,
+        "total": 83
+      },
+      {
+        "space_group_no": 62,
+        "space_group": "Pnma",
+        "train": 50,
+        "val": 12,
+        "test": 11,
+        "total": 73
+      },
+      {
+        "space_group_no": 14,
+        "space_group": "P2_1/c",
+        "train": 57,
+        "val": 9,
+        "test": 6,
+        "total": 72
+      },
+      {
+        "space_group_no": 194,
+        "space_group": "P6_3/mmc",
+        "train": 33,
+        "val": 9,
+        "test": 9,
+        "total": 51
+      },
+      {
+        "space_group_no": 139,
+        "space_group": "I4/mmm",
+        "train": 37,
+        "val": 6,
+        "test": 4,
+        "total": 47
+      },
+      {
+        "space_group_no": 12,
+        "space_group": "C2/m",
+        "train": 35,
+        "val": 5,
+        "test": 6,
+        "total": 46
+      },
+      {
+        "space_group_no": 221,
+        "space_group": "Pm-3m",
+        "train": 28,
+        "val": 9,
+        "test": 8,
+        "total": 45
+      },
+      {
+        "space_group_no": 166,
+        "space_group": "R-3m",
+        "train": 34,
+        "val": 5,
+        "test": 5,
+        "total": 44
+      },
+      {
+        "space_group_no": 2,
+        "space_group": "P-1",
+        "train": 29,
+        "val": 6,
+        "test": 7,
+        "total": 42
+      },
+      {
+        "space_group_no": 227,
+        "space_group": "Fd-3m",
+        "train": 28,
+        "val": 5,
+        "test": 6,
+        "total": 39
+      }
+    ],
+    "sg_imbalance_ratio": 2.11,
+    "sg_modeling_allowed": true,
+    "reason": "",
+    "warnings": [],
+    "total_sg_classes_in_split": 139,
+    "top10_train_min": 28,
+    "top10_train_max": 59
+  },
+  {
+    "domain": "D4",
+    "scale_pct": 10,
+    "label": "D4_10pct",
+    "top10_sg_classes": [
+      225,
+      14,
+      62,
+      194,
+      2,
+      139,
+      227,
+      221,
+      166,
+      12
+    ],
+    "sg_details": [
+      {
+        "space_group_no": 225,
+        "space_group": "Fm-3m",
+        "train": 109,
+        "val": 31,
+        "test": 21,
+        "total": 161
+      },
+      {
+        "space_group_no": 14,
+        "space_group": "P2_1/c",
+        "train": 106,
+        "val": 20,
+        "test": 27,
+        "total": 153
+      },
+      {
+        "space_group_no": 62,
+        "space_group": "Pnma",
+        "train": 110,
+        "val": 19,
+        "test": 21,
+        "total": 150
+      },
+      {
+        "space_group_no": 194,
+        "space_group": "P6_3/mmc",
+        "train": 72,
+        "val": 17,
+        "test": 18,
+        "total": 107
+      },
+      {
+        "space_group_no": 2,
+        "space_group": "P-1",
+        "train": 61,
+        "val": 12,
+        "test": 14,
+        "total": 87
+      },
+      {
+        "space_group_no": 139,
+        "space_group": "I4/mmm",
+        "train": 59,
+        "val": 12,
+        "test": 14,
+        "total": 85
+      },
+      {
+        "space_group_no": 227,
+        "space_group": "Fd-3m",
+        "train": 60,
+        "val": 9,
+        "test": 14,
+        "total": 83
+      },
+      {
+        "space_group_no": 221,
+        "space_group": "Pm-3m",
+        "train": 58,
+        "val": 12,
+        "test": 12,
+        "total": 82
+      },
+      {
+        "space_group_no": 166,
+        "space_group": "R-3m",
+        "train": 60,
+        "val": 6,
+        "test": 15,
+        "total": 81
+      },
+      {
+        "space_group_no": 12,
+        "space_group": "C2/m",
+        "train": 57,
+        "val": 9,
+        "test": 14,
+        "total": 80
+      }
+    ],
+    "sg_imbalance_ratio": 1.93,
+    "sg_modeling_allowed": true,
+    "reason": "",
+    "warnings": [],
+    "total_sg_classes_in_split": 161,
+    "top10_train_min": 57,
+    "top10_train_max": 110
+  },
+  {
+    "domain": "D4",
+    "scale_pct": 15,
+    "label": "D4_15pct",
+    "top10_sg_classes": [
+      62,
+      14,
+      225,
+      194,
+      166,
+      227,
+      2,
+      139,
+      12,
+      221
+    ],
+    "sg_details": [
+      {
+        "space_group_no": 62,
+        "space_group": "Pnma",
+        "train": 171,
+        "val": 33,
+        "test": 31,
+        "total": 235
+      },
+      {
+        "space_group_no": 14,
+        "space_group": "P2_1/c",
+        "train": 151,
+        "val": 33,
+        "test": 42,
+        "total": 226
+      },
+      {
+        "space_group_no": 225,
+        "space_group": "Fm-3m",
+        "train": 161,
+        "val": 25,
+        "test": 35,
+        "total": 221
+      },
+      {
+        "space_group_no": 194,
+        "space_group": "P6_3/mmc",
+        "train": 107,
+        "val": 26,
+        "test": 24,
+        "total": 157
+      },
+      {
+        "space_group_no": 166,
+        "space_group": "R-3m",
+        "train": 94,
+        "val": 18,
+        "test": 20,
+        "total": 132
+      },
+      {
+        "space_group_no": 227,
+        "space_group": "Fd-3m",
+        "train": 86,
+        "val": 19,
+        "test": 20,
+        "total": 125
+      },
+      {
+        "space_group_no": 2,
+        "space_group": "P-1",
+        "train": 84,
+        "val": 21,
+        "test": 20,
+        "total": 125
+      },
+      {
+        "space_group_no": 139,
+        "space_group": "I4/mmm",
+        "train": 90,
+        "val": 16,
+        "test": 19,
+        "total": 125
+      },
+      {
+        "space_group_no": 12,
+        "space_group": "C2/m",
+        "train": 96,
+        "val": 16,
+        "test": 12,
+        "total": 124
+      },
+      {
+        "space_group_no": 221,
+        "space_group": "Pm-3m",
+        "train": 91,
+        "val": 15,
+        "test": 18,
+        "total": 124
+      }
+    ],
+    "sg_imbalance_ratio": 2.04,
+    "sg_modeling_allowed": true,
+    "reason": "",
+    "warnings": [],
+    "total_sg_classes_in_split": 174,
+    "top10_train_min": 84,
+    "top10_train_max": 171
+  },
+  {
+    "domain": "D4",
+    "scale_pct": 20,
+    "label": "D4_20pct",
+    "top10_sg_classes": [
+      62,
+      14,
+      225,
+      194,
+      2,
+      12,
+      166,
+      221,
+      139,
+      227
+    ],
+    "sg_details": [
+      {
+        "space_group_no": 62,
+        "space_group": "Pnma",
+        "train": 223,
+        "val": 46,
+        "test": 49,
+        "total": 318
+      },
+      {
+        "space_group_no": 14,
+        "space_group": "P2_1/c",
+        "train": 209,
+        "val": 51,
+        "test": 50,
+        "total": 310
+      },
+      {
+        "space_group_no": 225,
+        "space_group": "Fm-3m",
+        "train": 204,
+        "val": 41,
+        "test": 48,
+        "total": 293
+      },
+      {
+        "space_group_no": 194,
+        "space_group": "P6_3/mmc",
+        "train": 141,
+        "val": 35,
+        "test": 34,
+        "total": 210
+      },
+      {
+        "space_group_no": 2,
+        "space_group": "P-1",
+        "train": 123,
+        "val": 28,
+        "test": 26,
+        "total": 177
+      },
+      {
+        "space_group_no": 12,
+        "space_group": "C2/m",
+        "train": 120,
+        "val": 24,
+        "test": 27,
+        "total": 171
+      },
+      {
+        "space_group_no": 166,
+        "space_group": "R-3m",
+        "train": 116,
+        "val": 24,
+        "test": 31,
+        "total": 171
+      },
+      {
+        "space_group_no": 221,
+        "space_group": "Pm-3m",
+        "train": 126,
+        "val": 22,
+        "test": 21,
+        "total": 169
+      },
+      {
+        "space_group_no": 139,
+        "space_group": "I4/mmm",
+        "train": 116,
+        "val": 31,
+        "test": 21,
+        "total": 168
+      },
+      {
+        "space_group_no": 227,
+        "space_group": "Fd-3m",
+        "train": 111,
+        "val": 26,
+        "test": 22,
+        "total": 159
+      }
+    ],
+    "sg_imbalance_ratio": 2.01,
+    "sg_modeling_allowed": true,
+    "reason": "",
+    "warnings": [],
+    "total_sg_classes_in_split": 183,
+    "top10_train_min": 111,
+    "top10_train_max": 223
+  }
+]

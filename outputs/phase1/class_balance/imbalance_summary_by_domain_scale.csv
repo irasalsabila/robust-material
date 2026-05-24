@@ -1,0 +1,17 @@
+domain,scale_pct,cs_imbalance_ratio,cs_recommendation,sg_imbalance_ratio,sg_recommendation,chosen_sg_threshold,surviving_sg_count
+D1,5,30.0,weighted sampler + focal loss,1.79,standard cross-entropy,50,4
+D1,10,30.0,weighted sampler + focal loss,1.04,standard cross-entropy,150,3
+D1,15,30.0,weighted sampler + focal loss,1.13,standard cross-entropy,200,3
+D1,20,30.0,weighted sampler + focal loss,1.58,standard cross-entropy,200,4
+D2,5,30.0,weighted sampler + focal loss,1.79,standard cross-entropy,50,4
+D2,10,30.0,weighted sampler + focal loss,1.04,standard cross-entropy,150,3
+D2,15,30.0,weighted sampler + focal loss,1.13,standard cross-entropy,200,3
+D2,20,30.0,weighted sampler + focal loss,1.58,standard cross-entropy,200,4
+D3,5,30.0,weighted sampler + focal loss,1.79,standard cross-entropy,50,4
+D3,10,30.0,weighted sampler + focal loss,1.04,standard cross-entropy,150,3
+D3,15,30.0,weighted sampler + focal loss,1.13,standard cross-entropy,200,3
+D3,20,30.0,weighted sampler + focal loss,1.58,standard cross-entropy,200,4
+D4,5,30.0,weighted sampler + focal loss,1.79,standard cross-entropy,50,4
+D4,10,30.0,weighted sampler + focal loss,1.04,standard cross-entropy,150,3
+D4,15,30.0,weighted sampler + focal loss,1.13,standard cross-entropy,200,3
+D4,20,30.0,weighted sampler + focal loss,1.58,standard cross-entropy,200,4

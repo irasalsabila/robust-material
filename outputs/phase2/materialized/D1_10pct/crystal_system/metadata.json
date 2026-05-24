@@ -1,0 +1,15 @@
+{
+  "domain": "D1",
+  "scale_pct": 10,
+  "task": "crystal_system",
+  "normalization": "max_intensity",
+  "target_length": 4500,
+  "num_classes": 7,
+  "train_samples": 38736,
+  "val_samples": 8304,
+  "test_samples": 8328,
+  "x_dtype": "float32",
+  "y_dtype": "int64",
+  "leakage_clean": true,
+  "total_time_s": 125.5
+}
