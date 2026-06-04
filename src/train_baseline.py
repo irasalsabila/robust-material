@@ -78,7 +78,7 @@ def get_device() -> torch.device:
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Phase 3 XRD Baseline Training")
-    p.add_argument("--model",    default="cnn1d", choices=["mlp", "cnn1d"],
+    p.add_argument("--model",    default="cnn1d", choices=["mlp", "cnn1d", "resnet1d", "cnn_attention"],
                    help="Model architecture")
     # Single-domain shorthand (kept for backward compat)
     p.add_argument("--domain",   default=None,    choices=["D1","D2","D3","D4"],
@@ -107,14 +107,19 @@ def parse_args() -> argparse.Namespace:
                    help="Override auto-generated run name")
     p.add_argument("--patience",      default=5,    type=int,
                    help="Early stopping patience (0 = disabled)")
-    p.add_argument("--no-class-weights", action="store_true",
-                   help="Disable class-weighted loss")
-    p.add_argument("--source", default=None, choices=["zip", "materialized"],
-                   help="Data source: 'zip', 'materialized', or auto-detect (default)")
-    p.add_argument("--loss", default="ce", choices=["ce", "focal"],
-                   help="Loss function: cross-entropy (ce) or focal loss (focal)")
+    p.add_argument("--imbalance-mode", default="auto",
+                   choices=["auto", "natural", "weighted_loss", "oversample",
+                            "oversample_weighted_loss", "focal"],
+                   help="Imbalance handling strategy (auto = task-dependent default)")
     p.add_argument("--focal-gamma", default=2.0, type=float,
                    help="Focal loss gamma parameter (default 2.0)")
+    p.add_argument("--source", default=None, choices=["zip", "materialized"],
+                   help="Data source: 'zip', 'materialized', or auto-detect (default)")
+    # Legacy flags for backward compatibility
+    p.add_argument("--no-class-weights", action="store_true",
+                   help="(Deprecated) Use --imbalance-mode natural instead")
+    p.add_argument("--loss", default=None, choices=["ce", "focal"],
+                   help="(Deprecated) Use --imbalance-mode instead")
     args = p.parse_args()
 
     # Resolve domain flags
@@ -133,6 +138,25 @@ def parse_args() -> argparse.Namespace:
     # Backwards-compat: set args.domain to the first train domain for run naming
     if args.domain is None:
         args.domain = args.train_domains[0]
+
+    # Handle legacy flags
+    if args.loss is not None or args.no_class_weights:
+        logger.warning("--loss and --no-class-weights are deprecated; use --imbalance-mode instead")
+        if args.loss == "focal":
+            args.imbalance_mode = "focal"
+        elif args.no_class_weights:
+            args.imbalance_mode = "natural"
+
+    # Resolve auto mode based on task
+    if args.imbalance_mode == "auto":
+        if args.task == "crystal_system":
+            # ~30x imbalance: use oversample + weighted loss by default
+            args.imbalance_mode = "oversample_weighted_loss"
+        else:
+            # ~2x imbalance: natural training is sufficient
+            args.imbalance_mode = "natural"
+        logger.info("Auto-selected imbalance_mode=%s for task=%s",
+                    args.imbalance_mode, args.task)
 
     return args
 
@@ -285,6 +309,9 @@ def main() -> None:
         and args.train_domains[0] != args.test_domain
     )
 
+    # Decide weighted sampler based on imbalance_mode
+    use_weighted_sampler = args.imbalance_mode in ["oversample", "oversample_weighted_loss"]
+
     if is_multi:
         dm = MultiDomainDataModule(
             manifest_path        = manifest_path,
@@ -316,6 +343,7 @@ def main() -> None:
             label_map_dir        = ROOT / "outputs" / "label_mappings",
             source               = args.source,
             materialized_base_dir= ROOT / "outputs" / "materialized",
+            use_weighted_sampler = use_weighted_sampler,
         )
 
     dm.setup()
@@ -341,23 +369,32 @@ def main() -> None:
         args.model, f"{model.count_parameters():,}",
     )
 
-    # ── Loss ──────────────────────────────────────────────────────────────
-    cw = None if args.no_class_weights else dm.class_weights().to(device)
+    # ── Imbalance handling ───────────────────────────────────────────────
+    # Determine loss and sampler based on imbalance_mode
+    use_weighted_sampler = args.imbalance_mode in ["oversample", "oversample_weighted_loss"]
+    use_class_weights = args.imbalance_mode in ["weighted_loss", "oversample_weighted_loss"]
+    use_focal_loss = args.imbalance_mode == "focal"
+
+    # Get class weights if needed
+    cw = dm.class_weights().to(device) if use_class_weights else None
     if cw is not None:
         logger.info("Class weights: %s", [round(w, 4) for w in cw.cpu().tolist()])
 
-    if args.loss == "focal":
-        criterion = FocalLoss(gamma=args.focal_gamma, weight=cw)
-        logger.info(
-            "Loss: FocalLoss(gamma=%.1f, class_weights=%s)",
-            args.focal_gamma, cw is not None,
-        )
-    elif cw is not None:
+    # Build loss function
+    if use_focal_loss:
+        criterion = FocalLoss(gamma=args.focal_gamma, weight=None)
+        logger.info("Loss: FocalLoss(gamma=%.1f)", args.focal_gamma)
+    elif use_class_weights:
         criterion = nn.CrossEntropyLoss(weight=cw)
         logger.info("Loss: CrossEntropyLoss with class weights")
     else:
         criterion = nn.CrossEntropyLoss()
         logger.info("Loss: CrossEntropyLoss (no class weights)")
+
+    # Log imbalance mode
+    logger.info("Imbalance mode: %s", args.imbalance_mode)
+    logger.info("  Sampler: %s", "WeightedRandomSampler" if use_weighted_sampler else "shuffle")
+    logger.info("  Loss weights: %s", "enabled" if use_class_weights else "disabled")
 
     # ── Optimizer & scheduler ─────────────────────────────────────────────
     optimizer = AdamW(
@@ -385,10 +422,11 @@ def main() -> None:
         "seed":            args.seed,
         "device":          str(device),
         "num_params":      model.count_parameters(),
-        "loss":            args.loss,
-        "focal_gamma":     args.focal_gamma if args.loss == "focal" else None,
-        "class_weights":   ([] if args.no_class_weights
-                            else [round(w, 6) for w in dm.class_weights().tolist()]),
+        "imbalance_mode":  args.imbalance_mode,
+        "focal_gamma":     args.focal_gamma if use_focal_loss else None,
+        "use_weighted_sampler": use_weighted_sampler,
+        "use_class_weights": use_class_weights,
+        "class_weights":   ([round(w, 6) for w in cw.cpu().tolist()] if cw is not None else []),
         "manifest_path":   str(manifest_path.relative_to(ROOT)),
         # For multi-domain: record per-domain split paths
         "splits_dir":      str(splits_dir.relative_to(ROOT)),
@@ -453,6 +491,7 @@ def main() -> None:
             "val_balanced_accuracy": round(val_bacc, 6),
             "lr":           round(current_lr, 8),
             "epoch_time_s": round(elapsed, 2),
+            "imbalance_mode": args.imbalance_mode,
         })
 
         # ── Model selection ───────────────────────────────────────────────

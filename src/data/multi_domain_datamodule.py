@@ -101,6 +101,7 @@ class MultiDomainDataModule:
         label_map_dir: str | Path = "outputs/label_mappings",
         source: Optional[str] = None,
         materialized_base_dir: str | Path = "outputs/materialized",
+        use_weighted_sampler: Optional[bool] = None,
     ) -> None:
         if not train_domains:
             raise ValueError("train_domains must be a non-empty list")
@@ -118,6 +119,7 @@ class MultiDomainDataModule:
         self.num_workers      = num_workers
         self.pin_memory       = pin_memory
         self.label_map_dir    = Path(label_map_dir)
+        self._use_weighted_sampler_override = use_weighted_sampler
         self._source          = source
         self._materialized_base_dir = Path(materialized_base_dir)
 
