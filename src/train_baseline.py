@@ -2,13 +2,18 @@
 src/train_baseline.py
 
 Phase 3 baseline training for XRD crystal classification.
+Supports single-domain and multi-domain (cross-domain) training.
 
 Usage
 -----
+    # Single domain
     python src/train_baseline.py --model cnn1d --domain D1 --scale 10 --task crystal_system --epochs 10
-    python src/train_baseline.py --model mlp   --domain D1 --scale 10 --task crystal_system --epochs 10
 
-Outputs  (outputs/phase3/baseline/{run_name}/)
+    # Multi-domain training, tested on D3
+    python src/train_baseline.py --model cnn1d --domains D1,D2 --test-domain D3 \
+        --scale 10 --task crystal_system --epochs 10
+
+Outputs  (outputs/baselines/{run_name}/)
 -------
     config.json
     train_log.csv
@@ -38,6 +43,7 @@ ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(ROOT))
 
 from src.data.datamodule import XRDDataModule
+from src.data.multi_domain_datamodule import MultiDomainDataModule
 from src.models import build_model
 from src.utils.metrics import (
     compute_metrics,
@@ -74,8 +80,18 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Phase 3 XRD Baseline Training")
     p.add_argument("--model",    default="cnn1d", choices=["mlp", "cnn1d"],
                    help="Model architecture")
-    p.add_argument("--domain",   default="D1",    choices=["D1","D2","D3","D4"])
-    p.add_argument("--scale",    default=10,       type=int, choices=[5,10,15,20])
+    # Single-domain shorthand (kept for backward compat)
+    p.add_argument("--domain",   default=None,    choices=["D1","D2","D3","D4"],
+                   help="Single training/test domain (legacy; use --domains + --test-domain "
+                        "for cross-domain experiments)")
+    # Multi-domain flags
+    p.add_argument("--domains",  default=None,
+                   help="Comma-separated training domains, e.g. 'D1,D2,D3'. "
+                        "Overrides --domain for training.")
+    p.add_argument("--test-domain", default=None, choices=["D1","D2","D3","D4"],
+                   help="Domain to evaluate on. Defaults to the single --domain "
+                        "when --domains is not set.")
+    p.add_argument("--scale",    default=10,       type=int, choices=[5,10,15,20,25,30,35])
     p.add_argument("--task",     default="crystal_system",
                    choices=["crystal_system","top10_space_group"])
     p.add_argument("--epochs",   default=10,       type=int)
@@ -95,7 +111,30 @@ def parse_args() -> argparse.Namespace:
                    help="Disable class-weighted loss")
     p.add_argument("--source", default=None, choices=["zip", "materialized"],
                    help="Data source: 'zip', 'materialized', or auto-detect (default)")
-    return p.parse_args()
+    p.add_argument("--loss", default="ce", choices=["ce", "focal"],
+                   help="Loss function: cross-entropy (ce) or focal loss (focal)")
+    p.add_argument("--focal-gamma", default=2.0, type=float,
+                   help="Focal loss gamma parameter (default 2.0)")
+    args = p.parse_args()
+
+    # Resolve domain flags
+    if args.domains is not None:
+        # --domains takes precedence
+        args.train_domains = [d.strip() for d in args.domains.split(",")]
+    elif args.domain is not None:
+        args.train_domains = [args.domain]
+    else:
+        args.train_domains = ["D1"]
+
+    if args.test_domain is None:
+        # Default test domain = last training domain (or the only one)
+        args.test_domain = args.train_domains[-1]
+
+    # Backwards-compat: set args.domain to the first train domain for run naming
+    if args.domain is None:
+        args.domain = args.train_domains[0]
+
+    return args
 
 
 # ---------------------------------------------------------------------------
@@ -143,6 +182,7 @@ def evaluate(
     device: torch.device,
     class_names: Optional[Dict[int, str]] = None,
     prefix: str = "val_",
+    task: str = "",
 ) -> Tuple[float, Dict]:
     """Run inference on a loader. Returns (avg_loss, metrics_dict)."""
     model.eval()
@@ -150,6 +190,7 @@ def evaluate(
     total      = 0
     all_preds:  List[int] = []
     all_labels: List[int] = []
+    all_probs:  List[List[float]] = []
 
     for batch in loader:
         x = batch["x"].to(device, non_blocking=True)
@@ -160,12 +201,23 @@ def evaluate(
 
         total_loss += loss.item() * x.size(0)
         preds       = logits.argmax(dim=1)
+        probs       = torch.softmax(logits, dim=1)
+
         all_preds.extend(preds.cpu().tolist())
         all_labels.extend(y.cpu().tolist())
+        all_probs.extend(probs.cpu().tolist())
         total += x.size(0)
 
     avg_loss = total_loss / total
-    metrics  = compute_metrics(all_labels, all_preds, class_names, prefix=prefix)
+    topk = [3, 5] if task == "top10_space_group" else None
+    metrics  = compute_metrics(
+        all_labels,
+        all_preds,
+        class_names,
+        prefix=prefix,
+        y_probs=all_probs,
+        topk=topk,
+    )
     return avg_loss, metrics
 
 
@@ -173,42 +225,99 @@ def evaluate(
 # Main
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Focal Loss
+# ---------------------------------------------------------------------------
+
+class FocalLoss(nn.Module):
+    """Multi-class focal loss  CE(p_t) * (1 - p_t)^gamma."""
+
+    def __init__(self, gamma: float = 2.0, weight=None):
+        super().__init__()
+        self.gamma  = gamma
+        self.weight = weight  # class weights tensor or None
+
+    def forward(self, logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+        log_probs = torch.nn.functional.log_softmax(logits, dim=1)
+        ce = torch.nn.functional.nll_loss(
+            log_probs, targets,
+            weight=self.weight, reduction="none",
+        )
+        # pt = exp(-ce) which equals the probability of the true class
+        pt = torch.exp(-ce)
+        focal = (1.0 - pt) ** self.gamma * ce
+        return focal.mean()
+
+
 def main() -> None:
     args   = parse_args()
     set_seed(args.seed)
     device = get_device()
 
     # ── Run name & output dir ─────────────────────────────────────────────
-    run_name = args.run_name or (
-        f"{args.model}_{args.domain}_{args.scale}pct_{args.task}"
-    )
-    out_dir = ROOT / "outputs" / "phase3" / "baseline" / run_name
+    train_tag = "+".join(args.train_domains)
+    test_tag  = args.test_domain
+    if args.run_name:
+        run_name = args.run_name
+    elif len(args.train_domains) == 1 and args.train_domains[0] == args.test_domain:
+        # Original single-domain naming
+        run_name = f"{args.model}_{args.domain}_{args.scale}pct_{args.task}"
+    else:
+        run_name = (
+            f"{args.model}_train{train_tag}_test{test_tag}"
+            f"_{args.scale}pct_{args.task}"
+        )
+    out_dir = ROOT / "outputs" / "baselines" / run_name
     out_dir.mkdir(parents=True, exist_ok=True)
 
     logger.info("Run: %s", run_name)
     logger.info("Device: %s", device)
     logger.info("Output dir: %s", out_dir)
+    logger.info("Train domains: %s", args.train_domains)
+    logger.info("Test domain:   %s", args.test_domain)
 
     # ── DataModule ────────────────────────────────────────────────────────
-    split_json = (
-        ROOT / "outputs" / "phase1" / "splits"
-        / f"split_{args.domain}_{args.scale}pct.json"
-    )
-    manifest_path = ROOT / "outputs" / "phase1" / "manifest.json"
+    manifest_path = ROOT / "outputs" / "data_audit" / "manifest.json"
+    splits_dir    = ROOT / "outputs" / "dataset_splits" / "splits"
 
-    dm = XRDDataModule(
-        manifest_path   = manifest_path,
-        split_json_path = split_json,
-        task            = args.task,
-        data_dir        = ROOT / "data",
-        normalization   = args.normalization,
-        target_length   = args.target_length,
-        batch_size      = args.batch_size,
-        num_workers     = args.num_workers,
-        label_map_dir   = ROOT / "outputs" / "phase2" / "label_mappings",
-        source          = args.source,
-        materialized_base_dir = ROOT / "outputs" / "phase2" / "materialized",
+    is_multi = len(args.train_domains) > 1 or (
+        len(args.train_domains) == 1
+        and args.train_domains[0] != args.test_domain
     )
+
+    if is_multi:
+        dm = MultiDomainDataModule(
+            manifest_path        = manifest_path,
+            splits_dir           = splits_dir,
+            train_domains        = args.train_domains,
+            test_domain          = args.test_domain,
+            scale                = args.scale,
+            task                 = args.task,
+            data_dir             = ROOT / "data",
+            normalization        = args.normalization,
+            target_length        = args.target_length,
+            batch_size           = args.batch_size,
+            num_workers          = args.num_workers,
+            label_map_dir        = ROOT / "outputs" / "label_mappings",
+            source               = args.source,
+            materialized_base_dir= ROOT / "outputs" / "materialized",
+        )
+    else:
+        split_json = splits_dir / f"split_{args.domain}_{args.scale}pct.json"
+        dm = XRDDataModule(
+            manifest_path        = manifest_path,
+            split_json_path      = split_json,
+            task                 = args.task,
+            data_dir             = ROOT / "data",
+            normalization        = args.normalization,
+            target_length        = args.target_length,
+            batch_size           = args.batch_size,
+            num_workers          = args.num_workers,
+            label_map_dir        = ROOT / "outputs" / "label_mappings",
+            source               = args.source,
+            materialized_base_dir= ROOT / "outputs" / "materialized",
+        )
+
     dm.setup()
 
     train_loader = dm.train_dataloader()
@@ -233,14 +342,22 @@ def main() -> None:
     )
 
     # ── Loss ──────────────────────────────────────────────────────────────
-    if args.no_class_weights:
+    cw = None if args.no_class_weights else dm.class_weights().to(device)
+    if cw is not None:
+        logger.info("Class weights: %s", [round(w, 4) for w in cw.cpu().tolist()])
+
+    if args.loss == "focal":
+        criterion = FocalLoss(gamma=args.focal_gamma, weight=cw)
+        logger.info(
+            "Loss: FocalLoss(gamma=%.1f, class_weights=%s)",
+            args.focal_gamma, cw is not None,
+        )
+    elif cw is not None:
+        criterion = nn.CrossEntropyLoss(weight=cw)
+        logger.info("Loss: CrossEntropyLoss with class weights")
+    else:
         criterion = nn.CrossEntropyLoss()
         logger.info("Loss: CrossEntropyLoss (no class weights)")
-    else:
-        cw = dm.class_weights().to(device)
-        criterion = nn.CrossEntropyLoss(weight=cw)
-        logger.info("Loss: CrossEntropyLoss with class weights: %s",
-                    [round(w, 4) for w in cw.cpu().tolist()])
 
     # ── Optimizer & scheduler ─────────────────────────────────────────────
     optimizer = AdamW(
@@ -254,7 +371,9 @@ def main() -> None:
     config = {
         "run_name":        run_name,
         "model":           args.model,
-        "domain":          args.domain,
+        "domain":          args.domain,          # first / only train domain
+        "train_domains":   args.train_domains,
+        "test_domain":     args.test_domain,
         "scale_pct":       args.scale,
         "task":            args.task,
         "epochs":          args.epochs,
@@ -266,10 +385,13 @@ def main() -> None:
         "seed":            args.seed,
         "device":          str(device),
         "num_params":      model.count_parameters(),
+        "loss":            args.loss,
+        "focal_gamma":     args.focal_gamma if args.loss == "focal" else None,
         "class_weights":   ([] if args.no_class_weights
                             else [round(w, 6) for w in dm.class_weights().tolist()]),
         "manifest_path":   str(manifest_path.relative_to(ROOT)),
-        "split_json_path": str(split_json.relative_to(ROOT)),
+        # For multi-domain: record per-domain split paths
+        "splits_dir":      str(splits_dir.relative_to(ROOT)),
         "num_classes":     dm.num_classes,
         "class_names":     {str(k): v for k, v in dm.class_names.items()},
     }
@@ -283,9 +405,11 @@ def main() -> None:
     log_rows: List[Dict] = []
 
     print("\n" + "=" * 72)
-    print(f"  Training {args.model.upper()} | {args.domain} {args.scale}% | {args.task}")
+    print(f"  Training {args.model.upper()} | "
+          f"train={'+'.join(args.train_domains)} -> test={args.test_domain} "
+          f"{args.scale}% | {args.task}")
     print(f"  Device: {device} | Params: {model.count_parameters():,}")
-    print(f"  Epochs: {args.epochs} | Batch: {args.batch_size} | LR: {args.lr}")
+    print(f"  Epochs: {args.epochs} | Batch: {args.batch_size} | LR: {args.lr} | Loss: {args.loss}")
     print("=" * 72)
     header = (f"{'Ep':>3}  {'TrainLoss':>9}  {'TrainAcc':>8}  "
               f"{'ValLoss':>8}  {'ValAcc':>7}  {'MacroF1':>8}  "
@@ -302,6 +426,7 @@ def main() -> None:
         val_loss, val_metrics = evaluate(
             model, val_loader, criterion, device,
             class_names=dm.class_names, prefix="val_",
+            task=args.task,
         )
         scheduler.step()
         elapsed = time.time() - t0
@@ -378,6 +503,7 @@ def main() -> None:
     _, val_metrics_best = evaluate(
         model, val_loader, criterion, device,
         class_names=dm.class_names, prefix="val_",
+        task=args.task,
     )
     save_metrics(val_metrics_best, out_dir / "val_metrics.json")
 
@@ -390,6 +516,7 @@ def main() -> None:
     _, test_metrics = evaluate(
         model, test_loader, criterion, device,
         class_names=dm.class_names, prefix="test_",
+        task=args.task,
     )
     save_metrics(test_metrics, out_dir / "test_metrics.json")
 
@@ -425,11 +552,16 @@ def main() -> None:
     # ── Final summary ─────────────────────────────────────────────────────
     print("\n" + "=" * 72)
     print("TRAINING COMPLETE")
-    print(f"  Run dir     : {out_dir}")
-    print(f"  Best epoch  : {best_epoch}")
-    print(f"  Val macro F1: {best_val_macro_f1:.4f}")
-    print(f"  Test macro F1: {test_metrics['test_macro_f1']:.4f}")
-    print(f"  Test accuracy: {test_metrics['test_accuracy']:.4f}")
+    print(f"  Run dir        : {out_dir}")
+    print(f"  Train domains  : {'+'.join(args.train_domains)}")
+    print(f"  Test domain    : {args.test_domain}")
+    print(f"  Best epoch     : {best_epoch}")
+    print(f"  Val macro F1   : {best_val_macro_f1:.4f}")
+    print(f"  Test macro F1  : {test_metrics['test_macro_f1']:.4f}")
+    print(f"  Test accuracy  : {test_metrics['test_accuracy']:.4f}")
+    print(f"  Test ECE       : {test_metrics.get('test_ece', 'N/A')}")
+    print(f"  Mean confidence: {test_metrics.get('test_mean_confidence', 'N/A')}")
+    print(f"  Overconf gap   : {test_metrics.get('test_overconfidence_gap', 'N/A')}")
     print("  Files saved:")
     for fname in [
         "config.json", "train_log.csv", "val_metrics.json",

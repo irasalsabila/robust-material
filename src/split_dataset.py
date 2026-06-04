@@ -21,7 +21,7 @@ Key design decisions
 
 Outputs
 -------
-  outputs/phase1/splits/split_{DOMAIN}_{SCALE}pct.json   (16 files)
+    outputs/dataset_splits/splits/split_{DOMAIN}_{SCALE}pct.json   (28 files)
 """
 
 import json
@@ -41,7 +41,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 DOMAINS = ["D1", "D2", "D3", "D4"]
-SCALES = [0.05, 0.10, 0.15, 0.20]
+SCALES = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35]
 SG_FREQ_THRESHOLDS = [50, 100, 150, 200]
 
 CRYSTAL_SYSTEM_NAMES: Dict[str, str] = {

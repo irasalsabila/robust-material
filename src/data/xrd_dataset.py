@@ -107,7 +107,7 @@ def _build_label_map(task: str) -> Tuple[Dict, Dict]:
 
 
 def save_label_mappings(output_dir: Path, task: str) -> None:
-    """Persist label maps to outputs/phase2/label_mappings/."""
+    """Persist label maps to outputs/label_mappings/."""
     output_dir.mkdir(parents=True, exist_ok=True)
     class_to_idx, idx_to_name = _build_label_map(task)
     payload = {
@@ -133,7 +133,7 @@ class XRDDataset(Dataset):
     data_dir       : directory containing D1.zip … D4.zip  (default: "data/")
     normalization  : "none" | "minmax" | "standard" | "max_intensity"
     target_length  : pad/truncate to this length  (default: 4500)
-    label_map_dir  : where to save label_map_*.json  (default: outputs/phase2/label_mappings/)
+    label_map_dir  : where to save label_map_*.json  (default: outputs/label_mappings/)
     """
 
     def __init__(
@@ -145,7 +145,7 @@ class XRDDataset(Dataset):
         data_dir: str | Path = "data",
         normalization: str = "max_intensity",
         target_length: int = 4500,
-        label_map_dir: str | Path = "outputs/phase2/label_mappings",
+        label_map_dir: str | Path = "outputs/label_mappings",
     ) -> None:
         if split not in ("train", "val", "test"):
             raise ValueError(f"split must be train/val/test, got '{split}'")
@@ -446,7 +446,7 @@ def get_materialized_cache_dir(
     domain: str,
     scale: int,
     task: str,
-    base_dir: str | Path = "outputs/phase2/materialized",
+    base_dir: str | Path = "outputs/materialized",
 ) -> Path:
     """Return the expected cache directory for a given config."""
     return Path(base_dir) / f"{domain}_{scale}pct" / task
@@ -456,7 +456,7 @@ def materialized_cache_exists(
     domain: str,
     scale: int,
     task: str,
-    base_dir: str | Path = "outputs/phase2/materialized",
+    base_dir: str | Path = "outputs/materialized",
 ) -> bool:
     """Check if a materialized cache exists and is complete."""
     cache_dir = get_materialized_cache_dir(domain, scale, task, base_dir)

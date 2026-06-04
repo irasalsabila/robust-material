@@ -1,0 +1,32 @@
+# configs/models/mlp.yaml
+# MLP baseline configuration template.
+# Do NOT run full training locally without a GPU.
+
+architecture: mlp
+description: >
+  Fully-connected MLP baseline. Flattens the 1-D XRD pattern and passes
+  through 3 hidden layers. Simple reference model with high parameter count.
+
+params:
+  input_length: 4500
+  hidden_dims: [512, 256, 128]
+  dropout: 0.3
+
+expected_params:
+  crystal_system: ~2.5M
+  top10_space_group: ~2.5M
+
+strengths:
+  - Simple to implement and debug
+  - No assumptions about local structure in XRD patterns
+  - Fast forward pass
+
+limitations:
+  - Cannot exploit local peak structure (no convolution)
+  - High parameter count relative to CNN baselines
+  - Sensitive to normalization choice
+  - Not suitable as multitask backbone (no forward_features method)
+
+notes: |
+  Use as a lower-bound baseline only.
+  Not used as a backbone in MultitaskModel.

@@ -2,10 +2,10 @@
 data/*.zip
 
 # ── Materialized numpy arrays (regenerate with materialize_dataset.py) ────
-outputs/phase2/materialized/**/*.npy
+outputs/materialized/**/*.npy
 
 # ── Training outputs (model checkpoints, logs) ────────────────────────────
-outputs/phase3/
+outputs/baselines/
 
 # ── Python bytecode ───────────────────────────────────────────────────────
 __pycache__/
@@ -28,4 +28,7 @@ venv/
 env/
 
 # ── Jupyter ───────────────────────────────────────────────────────────────
-.ipynb_checkpoints/outputs/phase1/zip_inspection.json
+.ipynb_checkpoints/outputs/data_audit/zip_inspection.json
+
+.agents/*
+.kilo/*

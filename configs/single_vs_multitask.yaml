@@ -1,0 +1,110 @@
+# configs/single_vs_multitask.yaml
+# Single-task vs multitask comparison experiment.
+# Core experiment for the paper's main research question.
+
+experiment: single_vs_multitask
+description: >
+  Compare single-task training (one model per task) against multitask training
+  (shared backbone, two heads) on crystal system and top-10 space group tasks.
+  Evaluates sample efficiency, robustness, and calibration.
+
+domains: [D1, D2, D3, D4]
+scales: [15, 20, 25, 30, 35]
+
+tasks:
+  single_task:
+    - crystal_system       # 7 classes, 30x imbalance
+    - top10_space_group    # 10 classes, ~2x imbalance
+  multitask:
+    crystal_system: true
+    top10_space_group: true
+    output_keys:
+      - crystal_logits
+      - space_group_logits
+
+models:
+  single_task:
+    - mlp
+    - cnn1d
+    - resnet1d
+    - cnn_attention
+  multitask:
+    - multitask_cnn1d         # MultitaskModel(backbone=cnn1d)
+    - multitask_resnet1d      # MultitaskModel(backbone=resnet1d)
+    - multitask_cnn_attention # MultitaskModel(backbone=cnn_attention)
+
+loss:
+  single_task:
+    crystal_system:
+      type: ce_weighted        # CrossEntropyLoss with class weights
+      sampler: weighted_random # WeightedRandomSampler (30x imbalance)
+    top10_space_group:
+      type: ce                 # Standard CrossEntropyLoss
+      sampler: none
+  multitask:
+    crystal_system_weight: 1.0
+    space_group_weight: 1.0
+    # Total loss = w_cs * L_cs + w_sg * L_sg
+    type: combined_ce_weighted
+    # Ablation: also test focal loss
+    alternatives:
+      - type: focal
+        gamma: 2.0
+
+train:
+  epochs: 100
+  batch_size: 256
+  lr: 0.001
+  weight_decay: 0.0001
+  patience: 10
+  normalization: max_intensity
+  target_length: 4500
+  seed: 42
+
+split_policy:
+  method: stratified_structure_level
+  ratios: {train: 0.70, val: 0.15, test: 0.15}
+  stratify_by: crystal_system_plus_filtered_sg
+  no_structure_leakage: true
+  no_augmentation_leakage: true
+  val_test_untouched: true
+  train_only_balancing: true
+
+metrics:
+  model_selection: val_macro_f1
+  reported:
+    per_head:
+      crystal_system:
+        - accuracy
+        - macro_f1
+        - weighted_f1
+        - balanced_accuracy
+        - ece
+        - mean_confidence
+        - overconfidence_gap
+      space_group:
+        - accuracy
+        - macro_f1
+        - top_3_accuracy
+        - top_5_accuracy
+        - ece
+        - mean_confidence
+        - overconfidence_gap
+    multitask_only:
+      - crystallographic_consistency  # % predictions where CS matches SG's CS
+
+ablation_questions:
+  - Does multitask learning reduce overfitting at small scales (15-20%)?
+  - Does multitask learning improve macro-F1 on space group task?
+  - Does sharing the backbone hurt crystal system performance?
+  - Does focal loss improve performance under class imbalance?
+
+outputs:
+  csv: outputs/single_vs_multitask/results.csv
+  checkpoints: outputs/single_vs_multitask/{run_name}/best_model.pt
+
+notes: |
+  - Do NOT run full training locally without a GPU.
+  - Multitask model selection uses the average of both heads' macro F1.
+  - Keep val/test splits identical between single-task and multitask runs.
+  - Use the same seed and split JSON for fair comparison.

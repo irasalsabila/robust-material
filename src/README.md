@@ -27,7 +27,7 @@ Dataset inspection and discovery.
   python src/inspect_zips.py
 
 **Outputs**:
-  outputs/phase1/zip_inspection.json
+  outputs/data_audit/zip_inspection.json
 
 **Key Features**:
   - Handles corrupted zip members gracefully
@@ -50,8 +50,8 @@ Structure-level manifest generation.
   python src/build_manifest.py
 
 **Outputs**:
-  outputs/phase1/manifest.json
-  outputs/phase1/manifest_analysis.json
+  outputs/data_audit/manifest.json
+  outputs/data_audit/manifest_analysis.json
 
 **Key Features**:
   - Reads all anno_train.csv and anno_val.csv files
@@ -80,9 +80,9 @@ Structure-level stratified splitting.
   python src/split_dataset.py
 
 **Outputs**:
-  outputs/phase1/split_full_dataset.json
-  outputs/phase1/split_subset_5pct.json
-  outputs/phase1/split_subset_10pct.json
+  outputs/dataset_splits/split_full_dataset.json
+  outputs/dataset_splits/split_subset_5pct.json
+  outputs/dataset_splits/split_subset_10pct.json
 
 **Key Features**:
   - Structure-level splitting (not pattern-level)
@@ -324,7 +324,7 @@ WARNING: Structure 12345 in split but not in manifest
 
 ## References
 
-- Dataset Format: See `outputs/phase1/PHASE1_SUMMARY.md`
+- Dataset Format: See `outputs/data_audit/PHASE1_SUMMARY.md`
 - Manifest Schema: Built from anno_train.csv/anno_val.csv
 - Split Ratios: 70/15/15 (configurable)
 - Stratification: Space group number (top-10)

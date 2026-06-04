@@ -49,7 +49,7 @@ PROJECT_ROOT = Path(__file__).parent.parent
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Phase 2 DataLoader smoke test")
     p.add_argument("--domain", default="D1", choices=["D1", "D2", "D3", "D4"])
-    p.add_argument("--scale",  default=10,   type=int, choices=[5, 10, 15, 20])
+    p.add_argument("--scale",  default=10,   type=int, choices=[5, 10, 15, 20, 25, 30, 35])
     p.add_argument("--task",   default="crystal_system",
                    choices=["crystal_system", "top10_space_group"])
     p.add_argument("--batch-size",     default=64,   type=int)
@@ -143,12 +143,12 @@ def label_distribution(dataset: XRDDataset, task: str) -> dict[str, int]:
 def main() -> None:
     args = parse_args()
 
-    manifest_path   = PROJECT_ROOT / "outputs" / "phase1" / "manifest.json"
+    manifest_path   = PROJECT_ROOT / "outputs" / "data_audit" / "manifest.json"
     split_json_path = (
-        PROJECT_ROOT / "outputs" / "phase1" / "splits"
+        PROJECT_ROOT / "outputs" / "dataset_splits" / "splits"
         / f"split_{args.domain}_{args.scale}pct.json"
     )
-    output_dir = PROJECT_ROOT / "outputs" / "phase2"
+    output_dir = PROJECT_ROOT / "outputs" / "dataloader_validation"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     print("\n" + "=" * 70)
@@ -173,9 +173,9 @@ def main() -> None:
         target_length   = args.target_length,
         batch_size      = args.batch_size,
         num_workers     = args.num_workers,
-        label_map_dir   = PROJECT_ROOT / "outputs" / "phase2" / "label_mappings",
+        label_map_dir   = PROJECT_ROOT / "outputs" / "label_mappings",
         source          = args.source,
-        materialized_base_dir = PROJECT_ROOT / "outputs" / "phase2" / "materialized",
+        materialized_base_dir = PROJECT_ROOT / "outputs" / "materialized",
     )
     dm.setup()
     setup_time = time.time() - t0

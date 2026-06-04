@@ -7,7 +7,7 @@ inference on val or test split, printing and saving metrics.
 Usage
 -----
     python src/evaluate.py \
-        --checkpoint outputs/phase3/baseline/cnn1d_D1_10pct_crystal_system/best_model.pt \
+        --checkpoint outputs/baselines/cnn1d_D1_10pct_crystal_system/best_model.pt \
         --split test
 """
 from __future__ import annotations
@@ -53,15 +53,17 @@ def parse_args() -> argparse.Namespace:
 @torch.no_grad()
 def run_inference(model, loader, device):
     model.eval()
-    all_preds, all_labels = [], []
+    all_preds, all_labels, all_probs = [], [], []
     for batch in loader:
         x = batch["x"].to(device)
         y = batch["y"]
         logits = model(x)
-        preds = logits.argmax(dim=1).cpu()
+        probs = torch.softmax(logits, dim=1)
+        preds = probs.argmax(dim=1).cpu()
         all_preds.extend(preds.tolist())
         all_labels.extend(y.tolist())
-    return all_labels, all_preds
+        all_probs.extend(probs.cpu().tolist())
+    return all_labels, all_preds, all_probs
 
 
 def main() -> None:
@@ -104,8 +106,16 @@ def main() -> None:
     print(f"Loaded checkpoint from epoch {ckpt.get('epoch', '?')} "
           f"(val macro_f1={ckpt.get('val_macro_f1', 0.0):.4f})")
 
-    labels, preds = run_inference(model, loader, device)
-    metrics = compute_metrics(labels, preds, dm.class_names, prefix=f"{args.split}_")
+    labels, preds, probs = run_inference(model, loader, device)
+    topk = [3, 5] if cfg["task"] == "top10_space_group" else None
+    metrics = compute_metrics(
+        labels,
+        preds,
+        dm.class_names,
+        prefix=f"{args.split}_",
+        y_probs=probs,
+        topk=topk,
+    )
 
     print(f"{args.split.upper()} METRICS")
     for k, v in metrics.items():

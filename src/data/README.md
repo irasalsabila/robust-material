@@ -18,9 +18,9 @@ Phase 2 data loading for XRD diffraction pattern classification.
 from src.data import XRDDataModule
 
 dm = XRDDataModule(
-    manifest_path   = \"outputs/phase1/manifest.json\",
-    split_json_path = \"outputs/phase1/splits/split_D1_10pct.json\",
-    task            = \"crystal_system\",   # or \"top10_space_group\"
+  manifest_path   = \"outputs/data_audit/manifest.json\",
+  split_json_path = \"outputs/dataset_splits/splits/split_D1_10pct.json\",
+  task            = \"crystal_system\",   # or \"top10_space_group\"
 )
 dm.setup()
 
@@ -88,7 +88,7 @@ Val and test distributions are **never** altered.
 
 ## Label Mappings
 
-Saved automatically to `outputs/phase2/label_mappings/` on first dataset construction:
+Saved automatically to `outputs/label_mappings/` on first dataset construction:
 - `label_map_crystal_system.json`
 - `label_map_top10_space_group.json`
 
@@ -99,5 +99,5 @@ python src/smoke_test_dataloader.py --domain D1 --scale 10 --task crystal_system
 python src/smoke_test_dataloader.py --domain D1 --scale 20 --task top10_space_group
 ```
 
-Saves report to `outputs/phase2/dataloader_smoke_test_report.md`.
+Saves report to `outputs/dataloader_validation/dataloader_smoke_test_report.md`.
 "

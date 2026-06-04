@@ -1,7 +1,7 @@
 """
 Phase 1.5: Split Validation (Multi-Domain)
 ==========================================
-Validates all split_*.json files in outputs/phase1/splits/ for:
+Validates all split_*.json files in outputs/dataset_splits/splits/ for:
   1. No structure leakage across train/val/test
   2. Every structure belongs to exactly one split
   3. All augmentations for selected structures are included
@@ -15,7 +15,7 @@ Validates all split_*.json files in outputs/phase1/splits/ for:
  11. Jensen-Shannon divergence for train vs val and train vs test
 
 Outputs:
-  outputs/phase1/validation/validation_report.json
+    outputs/data_audit/validation/validation_report.json
 
 Exit code: 0 if all valid, 1 if any invalid.
 """

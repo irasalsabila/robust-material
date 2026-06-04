@@ -1,0 +1,146 @@
+# configs/cross_domain.yaml
+# Cross-domain generalization experiment configuration.
+# Evaluates generalization across measurement conditions (noise/background domains).
+
+experiment: cross_domain_generalization
+description: >
+  Systematic cross-domain experiments to study how training domain composition
+  affects generalization to unseen or noisier test domains.
+
+domains:
+  D1: low_noise
+  D2: background+low_noise
+  D3: medium_noise
+  D4: high_noise
+
+scales: [15, 20, 25, 30, 35]
+
+tasks:
+  - crystal_system
+  - top10_space_group
+  - multitask
+
+models:
+  - cnn1d
+  - resnet1d
+  - multitask_cnn1d
+
+split_policy:
+  method: stratified_structure_level
+  ratios: {train: 0.70, val: 0.15, test: 0.15}
+  no_structure_leakage: true
+  no_augmentation_leakage: true
+  val_test_untouched: true
+  train_only_balancing: true
+  multi_domain_note: >
+    Multi-domain training concatenates datasets from train_domains.
+    All domains share the same structure-ID partition.
+    Test set is always from test_domain only.
+
+train:
+  epochs: 100
+  batch_size: 256
+  lr: 0.001
+  weight_decay: 0.0001
+  patience: 10
+  normalization: max_intensity
+  target_length: 4500
+  seed: 42
+
+experiments:
+
+  # Experiment 1: Single-domain training
+  # Train on one domain; evaluate on every domain separately.
+  single_domain:
+    description: "train Di -> test D1, D2, D3, D4 for each i"
+    train_configs:
+      - [D1]
+      - [D2]
+      - [D3]
+      - [D4]
+    test_domains: [D1, D2, D3, D4]
+    output: outputs/cross_domain/cross_domain_matrix.csv
+
+  # Experiment 2: Progressive domain mixing
+  # Incrementally add noisier domains to training set.
+  progressive_mixing:
+    description: "train D1, D1+D2, D1+D2+D3, D1+D2+D3+D4; test each domain"
+    train_configs:
+      - [D1]
+      - [D1, D2]
+      - [D1, D2, D3]
+      - [D1, D2, D3, D4]
+    test_domains: [D1, D2, D3, D4]
+    output: outputs/cross_domain/progressive_domain_mixing.csv
+
+  # Experiment 3: Leave-one-domain-out
+  # Train on all domains except the held-out test domain.
+  leave_one_out:
+    description: "train on 3 domains; test on held-out domain"
+    configs:
+      - train: [D2, D3, D4]       test: D1
+      - train: [D1, D3, D4]       test: D2
+      - train: [D1, D2, D4]       test: D3
+      - train: [D1, D2, D3]       test: D4
+    output: outputs/cross_domain/leave_one_domain_out.csv
+
+  # Experiment 4: Clean-to-noisy robustness
+  # Train only on clean D1; measure degradation as test noise increases.
+  clean_to_noisy:
+    description: "train D1 -> test D1, D2, D3, D4; report robustness drop"
+    train_domains: [D1]
+    test_domains: [D1, D2, D3, D4]
+    robustness_reference: D1     # compute drop relative to D1 test acc
+    output: outputs/cross_domain/clean_to_noisy.csv
+
+  # Experiment 5: Mixed-domain robustness
+  # Train on all domains; does mixing reduce robustness drop?
+  mixed_domain:
+    description: "train D1+D2+D3+D4 -> test each domain; compare drop vs clean-only"
+    train_domains: [D1, D2, D3, D4]
+    test_domains: [D1, D2, D3, D4]
+    robustness_reference: D1
+
+metrics_per_combination:
+  - train_domains
+  - test_domain
+  - task
+  - scale_pct
+  - architecture
+  - loss_type
+  - accuracy
+  - macro_f1
+  - top_3_accuracy      # space group only
+  - top_5_accuracy      # space group only
+  - ece
+  - mean_confidence
+  - overconfidence_gap
+  - robustness_drop     # relative to clean D1 test accuracy
+  - macro_f1_drop       # relative to clean D1 macro-F1
+
+ablation_questions:
+  - Does training only on clean D1 generalize to noisy domains?
+  - Does adding D2 background improve robustness to D3/D4?
+  - Does adding D3 medium-noise data improve D4 performance?
+  - Does full D1-D4 mixed training improve average robustness?
+  - Does multitask learning reduce robustness drop vs single-task?
+  - Does class-weighted CE or focal loss help under noisy cross-domain testing?
+
+outputs:
+  cross_domain_matrix:       outputs/cross_domain/cross_domain_matrix.csv
+  progressive_domain_mixing: outputs/cross_domain/progressive_domain_mixing.csv
+  leave_one_domain_out:      outputs/cross_domain/leave_one_domain_out.csv
+  robustness_drop_summary:   outputs/cross_domain/robustness_drop_summary.csv
+  calibration_summary:       outputs/cross_domain/calibration_summary.csv
+
+figures:
+  - heatmap_train_test_accuracy: train domains x test domains accuracy heatmap
+  - robustness_drop_vs_severity: line plot of robustness drop vs test noise level
+  - calibration_reliability:     confidence vs accuracy reliability diagram
+  - single_vs_multitask_drop:    bar plot comparing robustness drop
+
+notes: |
+  - Do NOT run full training locally without a GPU.
+  - Use src/experiments/cross_domain_eval.py to run all cross-domain experiments.
+  - Use --aggregate-only flag to build CSVs from already-trained checkpoints.
+  - All train/test splits use structure-level stratified partitions.

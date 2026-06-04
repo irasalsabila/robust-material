@@ -4,11 +4,11 @@ Phase 1.5: Class Balance Analysis (Multi-Domain)
 Analyzes class imbalance for every domain x scale pair.
 
 Inputs:
-  outputs/phase1/manifest.json
-  outputs/phase1/splits/split_{DOMAIN}_{SCALE}pct.json  (16 files)
+    outputs/data_audit/manifest.json
+    outputs/dataset_splits/split_{DOMAIN}_{SCALE}pct.json  (28 files)
 
 Outputs:
-  outputs/phase1/class_balance/
+    outputs/data_audit/class_balance/
     crystal_system_counts_by_domain_scale.csv
     space_group_threshold_summary_by_domain_scale.csv
     filtered_space_group_counts_by_domain_scale.csv
@@ -582,18 +582,18 @@ class ClassBalanceAnalyzer:
     def run_cleanup(self) -> None:
         """Remove obsolete individual plots and diagnostics.
 
-        KEEPS (never deleted):
-          - outputs/phase1/splits/*.json
-          - outputs/phase1/validation/validation_report.json
-          - outputs/phase1/manifest.json
-          - outputs/phase1/class_balance/*.csv
-          - outputs/phase1/class_balance/*.json
-          - outputs/phase1/class_balance/*.md
-          - outputs/phase1/class_balance/figures/crystal_system_comparison_all_domains_scales.png
-          - outputs/phase1/class_balance/figures/top10_space_group_comparison_all_domains_scales.png
-          - outputs/phase1/class_balance/figures/crystal_system_imbalance_by_domain_scale.png
-          - outputs/phase1/class_balance/figures/sg_class_count_by_threshold_domain_scale.png
-          - outputs/phase1/class_balance/figures/sg_imbalance_by_threshold_domain_scale.png
+                KEEPS (never deleted):
+                    - outputs/dataset_splits/splits/*.json
+                    - outputs/data_audit/validation/validation_report.json
+                    - outputs/data_audit/manifest.json
+                    - outputs/data_audit/class_balance/*.csv
+                    - outputs/data_audit/class_balance/*.json
+                    - outputs/data_audit/class_balance/*.md
+                    - outputs/data_audit/class_balance/figures/crystal_system_comparison_all_domains_scales.png
+                    - outputs/data_audit/class_balance/figures/top10_space_group_comparison_all_domains_scales.png
+                    - outputs/data_audit/class_balance/figures/crystal_system_imbalance_by_domain_scale.png
+                    - outputs/data_audit/class_balance/figures/sg_class_count_by_threshold_domain_scale.png
+                    - outputs/data_audit/class_balance/figures/sg_imbalance_by_threshold_domain_scale.png
 
         REMOVES:
           - Individual per-domain-scale distribution plots

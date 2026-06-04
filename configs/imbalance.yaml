@@ -1,0 +1,112 @@
+# configs/imbalance.yaml
+# Class imbalance handling ablation.
+# Compares loss functions and sampling strategies.
+
+experiment: imbalance_ablation
+description: >
+  Ablation over loss function and sampling strategy choices for handling
+  class imbalance. Crystal system has ~30x imbalance (key concern).
+  Space group top-10 has ~2x imbalance (mild).
+
+domains: [D1, D2, D3, D4]
+scales: [15, 20, 25, 30, 35]
+
+tasks:
+  - crystal_system       # primary target: 30x imbalance
+  - top10_space_group    # secondary: ~2x imbalance
+  - multitask
+
+models:
+  - cnn1d
+  - resnet1d
+  - multitask_cnn1d
+
+ablation_conditions:
+  # Crystal system
+  crystal_system:
+    - id: ce_no_weights
+      sampler: none
+      loss: ce
+      description: "Unweighted CE, no sampler"
+    - id: ce_weighted
+      sampler: none
+      loss: ce_weighted
+      description: "CE with inverse-frequency class weights"
+    - id: ce_weighted_sampler
+      sampler: weighted_random
+      loss: ce_weighted
+      description: "CE with class weights + WeightedRandomSampler (default)"
+    - id: focal
+      sampler: none
+      loss: focal
+      focal_gamma: 2.0
+      description: "Focal loss, no sampler"
+    - id: focal_sampler
+      sampler: weighted_random
+      loss: focal
+      focal_gamma: 2.0
+      description: "Focal loss + WeightedRandomSampler"
+
+  # Space group (mild imbalance; fewer conditions needed)
+  top10_space_group:
+    - id: ce_standard
+      sampler: none
+      loss: ce
+      description: "Standard CE (recommended default)"
+    - id: ce_weighted
+      sampler: none
+      loss: ce_weighted
+      description: "CE with class weights"
+    - id: focal
+      sampler: none
+      loss: focal
+      focal_gamma: 2.0
+      description: "Focal loss"
+
+split_policy:
+  method: stratified_structure_level
+  ratios: {train: 0.70, val: 0.15, test: 0.15}
+  no_structure_leakage: true
+  no_augmentation_leakage: true
+  val_test_untouched: true
+  train_only_balancing: true   # CRITICAL: never apply sampler/reweighting to val/test
+
+train:
+  epochs: 100
+  batch_size: 256
+  lr: 0.001
+  weight_decay: 0.0001
+  patience: 10
+  normalization: max_intensity
+  target_length: 4500
+  seed: 42
+
+metrics:
+  primary: val_macro_f1
+  secondary:
+    - balanced_accuracy
+    - per_class_recall   # key metric to detect if minority classes are predicted
+  reported:
+    - accuracy
+    - macro_f1
+    - weighted_f1
+    - balanced_accuracy
+    - ece
+    - mean_confidence
+    - overconfidence_gap
+
+ablation_questions:
+  - Does WeightedRandomSampler improve minority-class recall?
+  - Does focal loss outperform weighted CE for crystal system?
+  - Does imbalance handling degrade majority-class performance?
+  - Does the default (ce_weighted + sampler) remain optimal at all scales?
+  - Does multitask training implicitly reduce the effect of imbalance?
+
+outputs:
+  csv: outputs/imbalance/imbalance_ablation_results.csv
+  checkpoints: outputs/imbalance/{run_name}/best_model.pt
+
+notes: |
+  - Do NOT run full training locally without a GPU.
+  - Only change training loss/sampler; val/test must remain unchanged.
+  - Default setting (ce_weighted + sampler) should be the primary baseline.

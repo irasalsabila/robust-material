@@ -1,0 +1,51 @@
+# configs/models/resnet1d.yaml
+# ResNet1D configuration template.
+# Do NOT run full training locally without a GPU.
+
+architecture: resnet1d
+description: >
+  1-D ResNet with residual connections. Configurable depth via layers list.
+  Stem (stride-2 conv + MaxPool) followed by residual stages with optional
+  downsampling at stage boundaries.
+
+params:
+  input_length: 4500
+  layers: [2, 2, 2, 2]           # blocks per stage; total depth = 2*sum(layers) convs
+  channels: [64, 128, 256, 256]
+  kernel_size: 15
+  stem_channels: 64
+  dropout_res: 0.1
+  dropout_head: 0.3
+  adaptive_pool: 1
+
+expected_params:
+  crystal_system: ~8.6M    # default [2,2,2,2] layers with channels [64,128,256,256]
+  top10_space_group: ~8.6M
+  # For a smaller model use layers: [2, 2] with channels: [64, 128] (~0.5M)
+
+shape_trace:
+  input:   [B, 1, 4500]
+  stem:    [B, 64, 1125]         # stride-2 conv + MaxPool(stride-2)
+  stage0:  [B, 64, 1125]         # 2 blocks, no downsampling
+  stage1:  [B, 128, 563]         # 2 blocks, stride-2 at block 0
+  stage2:  [B, 256, 282]         # 2 blocks, stride-2 at block 0
+  stage3:  [B, 256, 282]         # 2 blocks, no downsampling (same channels)
+  pool:    [B, 256, 1]           # AdaptiveAvgPool1d(1)
+  flatten: [B, 256]
+  output:  [B, num_classes]
+
+strengths:
+  - Residual connections allow deeper networks without vanishing gradients
+  - Configurable depth for ablation studies
+  - Suitable as multitask backbone (forward_features exposed)
+  - Better at capturing multi-scale XRD features
+
+limitations:
+  - Slower to train than CNN1D
+  - Higher memory footprint
+  - May overfit at small data scales (15-20%)
+
+notes: |
+  Recommended for final model comparisons after CNN1D baseline is validated.
+  For multitask use: MultitaskModel(backbone='resnet1d').
+  Depth ablation: compare [2,2,2,2] vs [2,2,2] vs [2,2].

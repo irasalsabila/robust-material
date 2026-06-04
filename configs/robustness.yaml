@@ -1,0 +1,87 @@
+# configs/robustness.yaml
+# Robustness evaluation experiment configuration.
+# Measures performance degradation under increasing noise/background conditions.
+
+experiment: robustness
+description: >
+  Evaluate clean accuracy, noisy accuracy, robustness drop, and calibration
+  when models are tested on domains with increasing noise severity.
+  Compare single-task vs multitask robustness.
+
+domains:
+  D1: low_noise
+  D2: background+low_noise
+  D3: medium_noise
+  D4: high_noise
+
+scales: [15, 20, 25, 30, 35]
+
+tasks:
+  - crystal_system
+  - top10_space_group
+  - multitask
+
+models:
+  - cnn1d
+  - resnet1d
+  - cnn_attention
+  - multitask_cnn1d
+  - multitask_resnet1d
+
+train:
+  epochs: 100
+  batch_size: 256
+  lr: 0.001
+  weight_decay: 0.0001
+  patience: 10
+  normalization: max_intensity
+  target_length: 4500
+  seed: 42
+
+split_policy:
+  method: stratified_structure_level
+  ratios: {train: 0.70, val: 0.15, test: 0.15}
+  no_structure_leakage: true
+  no_augmentation_leakage: true
+  val_test_untouched: true
+  train_only_balancing: true
+  note: evaluate each domain test set separately; do NOT mix test sets
+
+robustness_metrics:
+  clean_domain: D1
+  definitions:
+    clean_accuracy:    "accuracy on D1 test set"
+    noisy_accuracy:    "accuracy on D2/D3/D4 test set"
+    robustness_drop:   "clean_accuracy - noisy_accuracy"
+    macro_f1_drop:     "clean_macro_f1 - noisy_macro_f1"
+
+calibration_metrics:
+  n_bins: 10
+  per_head:
+    - crystal_system
+    - space_group
+  metrics:
+    - ece                    # Expected Calibration Error
+    - mean_confidence
+    - overconfidence_gap     # mean_confidence - accuracy
+    - confidence_vs_accuracy_summary
+
+ablation_questions:
+  - Does multitask training reduce robustness_drop vs single-task?
+  - Does class-weighted CE or focal loss reduce robustness_drop?
+  - Which domain transition (D1->D2, D2->D3, D3->D4) causes the most drop?
+  - Does higher training scale reduce robustness_drop?
+
+outputs:
+  csv:
+    robustness_results: outputs/robustness/robustness_results.csv
+    calibration_summary: outputs/robustness/calibration_summary.csv
+  figures:
+    - robustness_drop_vs_noise: robustness drop line plot vs domain severity
+    - calibration_plot: confidence vs accuracy reliability diagram
+    - bar_single_vs_multitask: robustness drop comparison
+
+notes: |
+  - Do NOT run full training locally without a GPU.
+  - Evaluate on each domain separately; do NOT mix test sets.
+  - Use the same split JSONs as all other experiments for fair comparison.

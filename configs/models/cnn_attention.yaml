@@ -1,0 +1,54 @@
+# configs/models/cnn_attention.yaml
+# CNN + Multi-Head Self-Attention configuration template.
+# Do NOT run full training locally without a GPU.
+
+architecture: cnn_attention
+description: >
+  CNN feature extractor followed by multi-head self-attention (transformer
+  encoder layer). CNN extracts local peak features; attention allows the
+  model to relate distant XRD peaks globally.
+
+params:
+  input_length: 4500
+  cnn_channels: [64, 128, 256]
+  kernel_size: 15
+  pool_size: 4
+  d_model: 128
+  num_heads: 4
+  attn_dropout: 0.1
+  ff_dim: 256
+  num_attn_layers: 1
+  dropout_conv: 0.1
+  dropout_head: 0.3
+  adaptive_pool: 1
+
+expected_params:
+  crystal_system: ~900K
+  top10_space_group: ~900K
+
+shape_trace:
+  input:         [B, 1, 4500]
+  cnn_out:       [B, 256, ~70]     # after 3x MaxPool(4)
+  proj_out:      [B, 128, ~70]     # 1x1 conv projection to d_model
+  attn_in:       [B, ~70, 128]     # permuted for batch_first transformer
+  attn_out:      [B, ~70, 128]     # transformer encoder output
+  pool_in:       [B, 128, ~70]     # permuted back
+  pool_out:      [B, 128, 1]       # AdaptiveAvgPool1d(1)
+  flatten:       [B, 128]
+  output:        [B, num_classes]
+
+strengths:
+  - Combines local feature extraction (CNN) with global context (attention)
+  - Learnable positional encoding adapts to variable sequence lengths
+  - Suitable as multitask backbone (forward_features exposed)
+  - Multi-head attention can attend to multiple peak regions simultaneously
+
+limitations:
+  - Transformer layers add computational overhead
+  - Attention on short sequences (~70 tokens) may provide limited benefit
+  - More hyperparameters to tune (d_model, num_heads, ff_dim)
+
+notes: |
+  Ablation: compare num_attn_layers=1 vs 2 and d_model=64 vs 128.
+  For multitask use: MultitaskModel(backbone='cnn_attention').
+  Start with single attention layer; deeper configs risk overfitting at small scales.

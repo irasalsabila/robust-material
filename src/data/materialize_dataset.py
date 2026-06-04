@@ -4,7 +4,7 @@ src/data/materialize_dataset.py
 Pre-process XRD patterns from zip archives into numpy arrays for fast training.
 
 Reads patterns from zip, applies normalization + pad/truncate, and saves:
-    outputs/phase2/materialized/{domain}_{scale}pct/{task}/
+    outputs/materialized/{domain}_{scale}pct/{task}/
         x_train.npy          float32 [N_train, target_length]
         y_train.npy          int64   [N_train]
         x_val.npy            float32 [N_val, target_length]
@@ -57,7 +57,7 @@ logger = logging.getLogger(__name__)
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Materialize XRD dataset from zip to numpy")
     p.add_argument("--domain", default="D1", choices=["D1", "D2", "D3", "D4"])
-    p.add_argument("--scale", default=10, type=int, choices=[5, 10, 15, 20])
+    p.add_argument("--scale", default=10, type=int, choices=[5, 10, 15, 20, 25, 30, 35])
     p.add_argument("--task", default="crystal_system",
                    choices=["crystal_system", "top10_space_group"])
     p.add_argument("--normalization", default="max_intensity",
@@ -197,9 +197,9 @@ def verify_no_leakage(
 def main() -> None:
     args = parse_args()
 
-    manifest_path = ROOT / "outputs" / "phase1" / "manifest.json"
+    manifest_path = ROOT / "outputs" / "data_audit" / "manifest.json"
     split_json_path = (
-        ROOT / "outputs" / "phase1" / "splits"
+        ROOT / "outputs" / "dataset_splits" / "splits"
         / f"split_{args.domain}_{args.scale}pct.json"
     )
     data_dir = ROOT / "data"
@@ -208,7 +208,7 @@ def main() -> None:
         out_dir = Path(args.output_dir)
     else:
         out_dir = (
-            ROOT / "outputs" / "phase2" / "materialized"
+            ROOT / "outputs" / "materialized"
             / f"{args.domain}_{args.scale}pct" / args.task
         )
     out_dir.mkdir(parents=True, exist_ok=True)

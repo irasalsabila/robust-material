@@ -1,0 +1,135 @@
+# configs/baselines.yaml
+# Baseline and cross-domain experiment configuration.
+# Do NOT run full training locally without a GPU.
+
+experiment: baselines
+
+models:
+  - mlp
+  - cnn1d
+
+domains:
+  D1: low_noise
+  D2: background+low_noise
+  D3: medium_noise
+  D4: high_noise
+
+tasks:
+  - crystal_system       # 7 classes
+  - top10_space_group    # 10 classes
+
+scales: [5, 10, 15, 20, 25, 30, 35]
+
+train:
+  epochs: 100
+  batch_size: 256
+  lr: 0.001
+  weight_decay: 0.0001
+  patience: 10
+  normalization: max_intensity
+  target_length: 4500
+  seed: 42
+
+loss:
+  default: ce                   # cross-entropy with class weights
+  alternatives:
+    - focal                     # focal loss (gamma=2.0)
+
+# ---------------------------------------------------------------------------
+# Cross-domain generalization experiment
+# ---------------------------------------------------------------------------
+cross_domain:
+
+  # Experiment 1: Single-domain training
+  # Train Di -> test every Dj
+  single_domain:
+    train_domains: [[D1], [D2], [D3], [D4]]
+    test_domains:  [D1, D2, D3, D4]
+    output: outputs/cross_domain/cross_domain_matrix.csv
+
+  # Experiment 2: Progressive domain mixing
+  # Train D1, D1+D2, D1+D2+D3, D1+D2+D3+D4; test each domain
+  progressive_mixing:
+    train_configs:
+      - [D1]
+      - [D1, D2]
+      - [D1, D2, D3]
+      - [D1, D2, D3, D4]
+    test_domains: [D1, D2, D3, D4]
+    output: outputs/cross_domain/progressive_domain_mixing.csv
+
+  # Experiment 3: Leave-one-domain-out
+  # Train on all domains except held-out; test held-out
+  leave_one_out:
+    held_out_domains: [D1, D2, D3, D4]
+    output: outputs/cross_domain/leave_one_domain_out.csv
+
+  # Experiment 4: Clean-to-noisy robustness
+  # Train D1 -> test D2, D3, D4; report robustness drop vs D1 test
+  clean_to_noisy:
+    train_domains: [D1]
+    test_domains:  [D1, D2, D3, D4]
+    output: outputs/cross_domain/clean_to_noisy.csv
+
+  # Experiment 5: Mixed-domain robustness
+  # Train D1+D2+D3+D4 -> test each domain separately
+  # Reports whether mixed-domain training reduces robustness drop
+  mixed_domain:
+    train_domains: [D1, D2, D3, D4]
+    test_domains:  [D1, D2, D3, D4]
+
+  # Summary outputs
+  outputs:
+    cross_domain_matrix:       outputs/cross_domain/cross_domain_matrix.csv
+    progressive_domain_mixing: outputs/cross_domain/progressive_domain_mixing.csv
+    leave_one_domain_out:      outputs/cross_domain/leave_one_domain_out.csv
+    robustness_drop_summary:   outputs/cross_domain/robustness_drop_summary.csv
+    calibration_summary:       outputs/cross_domain/calibration_summary.csv
+
+  # Required metrics per train/test combination
+  metrics:
+    - train_domains
+    - test_domain
+    - task
+    - scale_pct
+    - architecture
+    - loss_type
+    - accuracy
+    - macro_f1
+    - top_3_accuracy    # space group task only
+    - top_5_accuracy    # space group task only
+    - ece
+    - mean_confidence
+    - overconfidence_gap
+    - robustness_drop   # relative to clean D1 test accuracy
+    - macro_f1_drop     # relative to clean D1 macro-F1
+
+# ---------------------------------------------------------------------------
+# Calibration reporting
+# ---------------------------------------------------------------------------
+calibration:
+  n_bins: 10
+  report_per_head:
+    - crystal_system
+    - top10_space_group
+  metrics:
+    - ece
+    - mean_confidence
+    - overconfidence_gap
+    - confidence_vs_accuracy_summary
+
+# ---------------------------------------------------------------------------
+# Robustness metrics
+# ---------------------------------------------------------------------------
+robustness:
+  clean_domain: D1
+  metrics:
+    - clean_accuracy        # accuracy on D1 test
+    - noisy_accuracy        # accuracy on D2/D3/D4 test
+    - robustness_drop       # clean_accuracy - noisy_accuracy
+    - macro_f1_drop         # clean_macro_f1 - noisy_macro_f1
+
+notes: |
+  - Baseline templates only. Do NOT run full training locally without a GPU.
+  - Use src/experiments/cross_domain_eval.py for all cross-domain experiments.
+  - Use --aggregate-only to build CSVs from already-trained checkpoints.

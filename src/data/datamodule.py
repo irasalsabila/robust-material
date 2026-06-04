@@ -7,8 +7,8 @@ train / val / test DataLoaders.
 Usage
 -----
     dm = XRDDataModule(
-        manifest_path  = "outputs/phase1/manifest.json",
-        split_json_path= "outputs/phase1/splits/split_D1_10pct.json",
+        manifest_path  = "outputs/data_audit/manifest.json",
+        split_json_path= "outputs/dataset_splits/splits/split_D1_10pct.json",
         task           = "crystal_system",
     )
     dm.setup()
@@ -55,8 +55,8 @@ class XRDDataModule:
     """
     Parameters
     ----------
-    manifest_path   : path to outputs/phase1/manifest.json
-    split_json_path : path to outputs/phase1/splits/split_{D}_{S}pct.json
+    manifest_path   : path to outputs/data_audit/manifest.json
+    split_json_path : path to outputs/dataset_splits/splits/split_{D}_{S}pct.json
     task            : "crystal_system" | "top10_space_group"
     data_dir        : directory containing D*.zip files  (default: "data")
     normalization   : "none" | "minmax" | "standard" | "max_intensity"
@@ -79,10 +79,10 @@ class XRDDataModule:
         batch_size: int = 64,
         num_workers: int = 0,
         pin_memory: bool = False,
-        label_map_dir: str | Path = "outputs/phase2/label_mappings",
+        label_map_dir: str | Path = "outputs/label_mappings",
         use_weighted_sampler: Optional[bool] = None,
         source: Optional[str] = None,
-        materialized_base_dir: str | Path = "outputs/phase2/materialized",
+        materialized_base_dir: str | Path = "outputs/materialized",
     ) -> None:
         self.manifest_path    = Path(manifest_path)
         self.split_json_path  = Path(split_json_path)

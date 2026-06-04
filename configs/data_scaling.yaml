@@ -1,0 +1,69 @@
+# configs/data_scaling.yaml
+# Dataset scaling experiment configuration.
+# Investigates sample efficiency: how performance scales with training data size.
+
+experiment: data_scaling
+description: >
+  Sweep training data scale (15-35%) for single-task and multitask models.
+  Primary research question: does multitask learning improve sample efficiency
+  under limited-data conditions?
+
+domains: [D1]            # Use clean domain for scaling analysis
+scales: [15, 20, 25, 30, 35]
+
+tasks:
+  single_task:
+    - crystal_system
+    - top10_space_group
+  multitask:
+    - [crystal_system, top10_space_group]
+
+models:
+  - mlp
+  - cnn1d
+  - resnet1d
+  - cnn_attention
+  - multitask_cnn1d       # MultitaskModel(backbone=cnn1d)
+  - multitask_resnet1d    # MultitaskModel(backbone=resnet1d)
+
+train:
+  epochs: 100
+  batch_size: 256
+  lr: 0.001
+  weight_decay: 0.0001
+  patience: 10
+  normalization: max_intensity
+  target_length: 4500
+  seed: 42
+
+split_policy:
+  method: stratified_structure_level
+  ratios: {train: 0.70, val: 0.15, test: 0.15}
+  stratify_by: crystal_system_plus_filtered_sg
+  no_structure_leakage: true
+  no_augmentation_leakage: true
+  val_test_untouched: true
+  train_only_balancing: true
+
+metrics:
+  primary: val_macro_f1
+  reported:
+    - accuracy
+    - macro_f1
+    - weighted_f1
+    - balanced_accuracy
+    - ece
+    - mean_confidence
+    - overconfidence_gap
+    - top_3_accuracy     # space group task only
+    - top_5_accuracy     # space group task only
+
+outputs:
+  csv: outputs/scaling/data_scaling_results.csv
+  checkpoints: outputs/scaling/{run_name}/best_model.pt
+
+notes: |
+  - Do NOT run full training locally without a GPU.
+  - Reference scale for most ablations: 20% (4.6k structures).
+  - Report learning curves (macro F1 vs scale) for paper Figure.
+  - Compare single-task vs multitask at each scale point.

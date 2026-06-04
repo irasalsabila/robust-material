@@ -1,0 +1,46 @@
+# configs/models/cnn1d.yaml
+# CNN1D baseline configuration template.
+# Do NOT run full training locally without a GPU.
+
+architecture: cnn1d
+description: >
+  3-block 1-D CNN baseline. Each block: Conv1d -> BN -> ReLU -> Dropout -> MaxPool.
+  Global adaptive average pooling before the FC head.
+
+params:
+  input_length: 4500
+  channels: [64, 128, 256]
+  kernel_size: 15
+  pool_size: 4
+  fc_dim: 256
+  dropout_conv: 0.1
+  dropout_fc: 0.3
+  adaptive_pool: 1
+
+expected_params:
+  crystal_system: ~684K
+  top10_space_group: ~684K
+
+shape_trace:
+  input:   [B, 1, 4500]
+  block1:  [B, 64,  1125]   # pool 4
+  block2:  [B, 128,  281]   # pool 4
+  block3:  [B, 256,   70]   # pool 4
+  pool:    [B, 256,    1]   # AdaptiveAvgPool1d(1)
+  flatten: [B, 256]
+  fc1:     [B, 256]         # after fc_dim projection
+  output:  [B, num_classes]
+
+strengths:
+  - Exploits local XRD peak structure via 1-D convolutions
+  - Moderate parameter count
+  - Global average pooling is input-length agnostic
+  - Suitable as multitask backbone (forward_features exposed)
+
+limitations:
+  - Fixed receptive field per block; misses long-range peak correlations
+  - Three conv blocks may underfit on high-noise domains (D3/D4)
+
+notes: |
+  Primary baseline and default MultitaskModel backbone.
+  Use as the backbone for all initial multitask experiments.
