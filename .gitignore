@@ -32,3 +32,4 @@ env/
 
 .agents/*
 .kilo/*
+outputs/data_audit/zip_inspection.json
