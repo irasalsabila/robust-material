@@ -126,6 +126,91 @@ def compute_robustness_drop(
     }
 
 
+# Space group to crystal system mapping (top-10 only)
+# Based on International Tables for Crystallography
+SG_TO_CRYSTAL_SYSTEM: Dict[int, int] = {
+    62: 2,   # Pnma       -> orthorhombic
+    14: 1,   # P2_1/c     -> monoclinic
+    225: 0,  # Fm-3m      -> cubic
+    194: 4,  # P6_3/mmc   -> hexagonal
+    2: 3,    # P-1        -> triclinic
+    12: 1,   # C2/m       -> monoclinic
+    166: 6,  # R-3m       -> trigonal
+    221: 0,  # Pm-3m      -> cubic
+    139: 5,  # I4/mmm     -> tetragonal
+    227: 0,  # Fd-3m      -> cubic
+}
+
+
+def compute_crystallographic_consistency(
+    pred_crystal_labels: List[int],
+    pred_space_group_labels: List[int],
+    sg_to_crystal_map: Optional[Dict[int, int]] = None,
+) -> float:
+    """Compute crystallographic consistency.
+
+    Returns the fraction of predictions where the predicted space group
+    belongs to the predicted crystal system.
+
+    Parameters
+    ----------
+    pred_crystal_labels     : predicted crystal system class indices [0-6]
+    pred_space_group_labels : predicted space group class indices [0-9]
+    sg_to_crystal_map       : mapping from SG number to crystal system index
+                              If None, uses the default top-10 SG mapping.
+
+    Returns
+    -------
+    consistency : float in [0, 1]
+
+    Raises
+    ------
+    ValueError if sg_to_crystal_map is None and no default is available,
+               or if array lengths mismatch.
+    """
+    if len(pred_crystal_labels) != len(pred_space_group_labels):
+        raise ValueError(
+            f"Length mismatch: crystal={len(pred_crystal_labels)} "
+            f"vs space_group={len(pred_space_group_labels)}"
+        )
+
+    if sg_to_crystal_map is None:
+        sg_to_crystal_map = SG_TO_CRYSTAL_SYSTEM
+
+    if not sg_to_crystal_map:
+        raise ValueError(
+            "sg_to_crystal_map is empty or None. "
+            "Cannot compute crystallographic consistency without a mapping."
+        )
+
+    # Convert SG class index -> SG number -> crystal system index
+    # For top-10: class index [0-9] maps to SG numbers via TOP10_SG_CLASSES
+    from src.data.xrd_dataset import TOP10_SG_CLASSES
+
+    consistent = 0
+    total = 0
+    for pred_cs, pred_sg_idx in zip(pred_crystal_labels, pred_space_group_labels):
+        # Map SG class index to SG number
+        if pred_sg_idx < 0 or pred_sg_idx >= len(TOP10_SG_CLASSES):
+            # Invalid SG index; skip
+            continue
+        sg_number = TOP10_SG_CLASSES[pred_sg_idx]
+
+        # Look up the crystal system for this SG
+        if sg_number not in sg_to_crystal_map:
+            # SG not in mapping; skip (should not happen for top-10)
+            continue
+
+        expected_cs = sg_to_crystal_map[sg_number]
+        if pred_cs == expected_cs:
+            consistent += 1
+        total += 1
+
+    if total == 0:
+        return 0.0
+    return float(round(consistent / total, 4))
+
+
 def compute_metrics(
     y_true: List[int],
     y_pred: List[int],

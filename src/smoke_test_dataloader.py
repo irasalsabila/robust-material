@@ -7,6 +7,7 @@ Usage
 -----
     python src/smoke_test_dataloader.py --domain D1 --scale 10 --task crystal_system
     python src/smoke_test_dataloader.py --domain D1 --scale 20 --task top10_space_group
+    python src/smoke_test_dataloader.py --domain D1 --scale 10 --task crystal_system --output-report custom.md
 
 Checks
 ------
@@ -16,17 +17,20 @@ Checks
 * No structure-level leakage between splits
 * Label distribution printed per split
 * Class weights printed
-* Report saved to outputs/phase2/dataloader_smoke_test_report.md
+* Report saved to outputs/dataloader_validation/dataloader_smoke_test_{domain}_{scale}pct_{task}.md
+* Index CSV updated at outputs/dataloader_validation/index.csv
 """
 
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import logging
 import sys
 import time
 from collections import Counter
+from datetime import datetime
 from pathlib import Path
 
 import torch
@@ -59,6 +63,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--target-length",  default=4500, type=int)
     p.add_argument("--source",         default=None, choices=["zip", "materialized"],
                    help="Data source: 'zip' (raw), 'materialized' (numpy cache), or auto")
+    p.add_argument("--output-report",  default=None,
+                   help="Custom output report path (default: auto-generated)")
     return p.parse_args()
 
 
@@ -272,7 +278,11 @@ def main() -> None:
     print()
 
     # ── Write report ──────────────────────────────────────────────────────────
-    report_path = output_dir / "dataloader_smoke_test_report.md"
+    if args.output_report:
+        report_path = Path(args.output_report)
+    else:
+        report_path = output_dir / f"dataloader_smoke_test_{args.domain}_{args.scale}pct_{args.task}.md"
+    
     _write_report(
         report_path  = report_path,
         args         = args,
@@ -286,6 +296,20 @@ def main() -> None:
         task         = args.task,
     )
     print(f"Report saved  : {report_path}")
+    
+    # ── Update index CSV ──────────────────────────────────────────────────────
+    _update_index_csv(
+        index_path   = output_dir / "index.csv",
+        domain       = args.domain,
+        scale        = args.scale,
+        task         = args.task,
+        report_path  = report_path,
+        leakage_status = leakage_status,
+        num_train    = len(dm.train_dataset),
+        num_val      = len(dm.val_dataset),
+        num_test     = len(dm.test_dataset),
+    )
+    print(f"Index updated : {output_dir / 'index.csv'}")
     print("=" * 70 + "\n")
 
     if leakage_issues:
@@ -380,6 +404,64 @@ def _write_report(
 
     with open(report_path, "w") as f:
         f.write("\n".join(lines) + "\n")
+
+
+def _update_index_csv(
+    index_path: Path,
+    domain: str,
+    scale: int,
+    task: str,
+    report_path: Path,
+    leakage_status: str,
+    num_train: int,
+    num_val: int,
+    num_test: int,
+) -> None:
+    """Update the index CSV with a new entry (append mode)."""
+    timestamp = datetime.now().isoformat()
+    
+    # Read existing entries if file exists
+    existing_rows = []
+    fieldnames = [
+        "domain", "scale", "task", "report_path", "timestamp",
+        "leakage_status", "num_train", "num_val", "num_test"
+    ]
+    
+    if index_path.exists():
+        with open(index_path, "r") as f:
+            reader = csv.DictReader(f)
+            existing_rows = list(reader)
+    
+    # Remove any existing entry for the same domain/scale/task
+    existing_rows = [
+        row for row in existing_rows
+        if not (row["domain"] == domain and
+                int(row["scale"]) == scale and
+                row["task"] == task)
+    ]
+    
+    # Add new entry
+    new_row = {
+        "domain": domain,
+        "scale": scale,
+        "task": task,
+        "report_path": str(report_path.relative_to(index_path.parent.parent)),
+        "timestamp": timestamp,
+        "leakage_status": leakage_status,
+        "num_train": num_train,
+        "num_val": num_val,
+        "num_test": num_test,
+    }
+    existing_rows.append(new_row)
+    
+    # Sort by domain, scale, task for readability
+    existing_rows.sort(key=lambda r: (r["domain"], int(r["scale"]), r["task"]))
+    
+    # Write back
+    with open(index_path, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(existing_rows)
 
 
 if __name__ == "__main__":
