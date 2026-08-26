@@ -13,7 +13,7 @@ Usage
     python src/train_baseline.py --model cnn1d --domains D1,D2 --test-domain D3 \
         --scale 10 --task crystal_system --epochs 10
 
-Outputs  (outputs/baselines/{run_name}/)
+Outputs  (outputs/baselines/{model}/{space|crystal}/{scale}pct/{run_name}/)
 -------
     config.json
     train_log.csv
@@ -91,7 +91,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--test-domain", default=None, choices=["D1","D2","D3","D4"],
                    help="Domain to evaluate on. Defaults to the single --domain "
                         "when --domains is not set.")
-    p.add_argument("--scale",    default=10,       type=int, choices=[5,10,15,20,25,30,35])
+    p.add_argument("--scale",    default=10,       type=int, choices=[5,10,15,20,25,30,35, 50])
     p.add_argument("--task",     default="crystal_system",
                    choices=["crystal_system","top10_space_group"])
     p.add_argument("--epochs",   default=10,       type=int)
@@ -101,7 +101,12 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--normalization", default="max_intensity",
                    choices=["none","minmax","standard","max_intensity"])
     p.add_argument("--target-length", default=4500, type=int)
-    p.add_argument("--num-workers",   default=0,    type=int)
+    p.add_argument("--num-workers",   default=4,    type=int,
+                   help="DataLoader worker processes (0 = load in main process)")
+    p.add_argument("--pin-memory", dest="pin_memory", action=argparse.BooleanOptionalAction,
+                   default=None, help="Pin CUDA memory for faster H2D copy (default: auto=on CUDA)")
+    p.add_argument("--amp", dest="amp", action=argparse.BooleanOptionalAction,
+                   default=None, help="Enable mixed precision on CUDA (default: auto=on CUDA)")
     p.add_argument("--seed",          default=42,   type=int)
     p.add_argument("--run-name",      default=None,
                    help="Override auto-generated run name")
@@ -183,12 +188,22 @@ def train_one_epoch(
         x = batch["x"].to(device, non_blocking=True)
         y = batch["y"].to(device, non_blocking=True)
 
-        optimizer.zero_grad()
-        logits = model(x)
-        loss   = criterion(logits, y)
-        loss.backward()
-        nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
-        optimizer.step()
+        optimizer.zero_grad(set_to_none=True)
+
+        with torch.autocast(device_type=device.type, enabled=scaler is not None):
+            logits = model(x)
+            loss   = criterion(logits, y)
+
+        if scaler is not None:
+            scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
+            nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+            scaler.step(optimizer)
+            scaler.update()
+        else:
+            loss.backward()
+            nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+            optimizer.step()
 
         total_loss += loss.item() * x.size(0)
         preds       = logits.argmax(dim=1)
@@ -278,6 +293,11 @@ def main() -> None:
     set_seed(args.seed)
     device = get_device()
 
+    use_amp = args.amp if args.amp is not None else device.type == "cuda"
+    pin_mem = args.pin_memory if args.pin_memory is not None else device.type == "cuda"
+    if use_amp:
+        logger.info("Mixed precision (AMP) enabled on %s", device)
+
     # ── Run name & output dir ─────────────────────────────────────────────
     train_tag = "+".join(args.train_domains)
     test_tag  = args.test_domain
@@ -291,7 +311,9 @@ def main() -> None:
             f"{args.model}_train{train_tag}_test{test_tag}"
             f"_{args.scale}pct_{args.task}"
         )
-    out_dir = ROOT / "outputs" / "baselines" / run_name
+    # Structured layout: outputs/baselines/{model}/{space|crystal}/{scale}pct/{run_name}
+    kind = "space" if args.task == "top10_space_group" else "crystal"
+    out_dir = ROOT / "outputs" / "baselines" / args.model / kind / f"{args.scale}pct" / run_name
     out_dir.mkdir(parents=True, exist_ok=True)
 
     logger.info("Run: %s", run_name)
@@ -325,6 +347,7 @@ def main() -> None:
             target_length        = args.target_length,
             batch_size           = args.batch_size,
             num_workers          = args.num_workers,
+            pin_memory           = pin_mem,
             label_map_dir        = ROOT / "outputs" / "label_mappings",
             source               = args.source,
             materialized_base_dir= ROOT / "outputs" / "materialized",
@@ -340,6 +363,7 @@ def main() -> None:
             target_length        = args.target_length,
             batch_size           = args.batch_size,
             num_workers          = args.num_workers,
+            pin_memory           = pin_mem,
             label_map_dir        = ROOT / "outputs" / "label_mappings",
             source               = args.source,
             materialized_base_dir= ROOT / "outputs" / "materialized",
@@ -455,11 +479,13 @@ def main() -> None:
     print(header)
     print("-" * len(header))
 
+    scaler = torch.amp.GradScaler("cuda", enabled=use_amp) if device.type == "cuda" else None
+
     for epoch in range(1, args.epochs + 1):
         t0 = time.time()
 
         train_loss, train_acc = train_one_epoch(
-            model, train_loader, criterion, optimizer, device
+            model, train_loader, criterion, optimizer, device, scaler
         )
         val_loss, val_metrics = evaluate(
             model, val_loader, criterion, device,
@@ -610,6 +636,11 @@ def main() -> None:
         exists = "OK" if (out_dir / fname).exists() else "MISSING"
         print(f"    [{exists}] {fname}")
     print("=" * 72 + "\n")
+
+    # Delete checkpoint
+    ckpt_path = out_dir / "best_model.pt"
+    if ckpt_path.exists():
+        ckpt_path.unlink()
 
 
 if __name__ == "__main__":

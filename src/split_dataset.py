@@ -41,7 +41,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 DOMAINS = ["D1", "D2", "D3", "D4"]
-SCALES = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35]
+SCALES = [0.25]
 SG_FREQ_THRESHOLDS = [50, 100, 150, 200]
 
 CRYSTAL_SYSTEM_NAMES: Dict[str, str] = {
@@ -526,8 +526,8 @@ def print_split_report(result: SplitResult) -> None:
 
 def main() -> None:
     project_root = Path(__file__).parent.parent
-    manifest_path = project_root / "outputs" / "phase1" / "manifest.json"
-    output_dir = project_root / "outputs" / "phase1" / "splits"
+    manifest_path = project_root / "outputs" / "data_audit" / "manifest.json"
+    output_dir = project_root / "outputs" / "dataset_splits" / "splits"
 
     splitter = MultiDomainSplitter(manifest_path)
 

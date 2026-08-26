@@ -1,11 +1,8 @@
-# ── Raw data (large zip archives) ─────────────────────────────────────────
-data/*.zip
+# ── Raw data (large zip archives, 100+ GB) ────────────────────────────────
+data/
 
-# ── Materialized numpy arrays (regenerate with materialize_dataset.py) ────
-outputs/materialized/**/*.npy
-
-# ── Training outputs (model checkpoints, logs) ────────────────────────────
-outputs/baselines/
+# ── Generated outputs (regenerate from source; 100+ GB) ───────────────────
+outputs/
 
 # ── Python bytecode ───────────────────────────────────────────────────────
 __pycache__/
@@ -28,8 +25,7 @@ venv/
 env/
 
 # ── Jupyter ───────────────────────────────────────────────────────────────
-.ipynb_checkpoints/outputs/data_audit/zip_inspection.json
+.ipynb_checkpoints/
 
 .agents/*
 .kilo/*
-outputs/data_audit/zip_inspection.json

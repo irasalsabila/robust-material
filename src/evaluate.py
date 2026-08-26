@@ -7,7 +7,7 @@ inference on val or test split, printing and saving metrics.
 Usage
 -----
     python src/evaluate.py \
-        --checkpoint outputs/baselines/cnn1d_D1_10pct_crystal_system/best_model.pt \
+        --checkpoint outputs/baselines/cnn1d/crystal/10pct/cnn1d_D1_10pct_crystal_system/best_model.pt \
         --split test
 """
 from __future__ import annotations

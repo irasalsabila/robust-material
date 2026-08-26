@@ -57,7 +57,7 @@ logger = logging.getLogger(__name__)
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Materialize XRD dataset from zip to numpy")
     p.add_argument("--domain", default="D1", choices=["D1", "D2", "D3", "D4"])
-    p.add_argument("--scale", default=10, type=int, choices=[5, 10, 15, 20, 25, 30, 35])
+    p.add_argument("--scale", default=10, type=int, choices=[5, 10, 15, 20, 25, 35, 50])
     p.add_argument("--task", default="crystal_system",
                    choices=["crystal_system", "top10_space_group"])
     p.add_argument("--normalization", default="max_intensity",
